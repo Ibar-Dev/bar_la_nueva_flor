@@ -13,7 +13,7 @@ class TestAppBackend(unittest.TestCase):
         import app
         app.DB_NAME = self.test_db
         # Crear base de datos y datos iniciales
-        import database_setup
+        import setup.database_setup as database_setup
         database_setup.DB_NAME = self.test_db
         database_setup.crear_base_de_datos()
 
@@ -24,7 +24,7 @@ class TestAppBackend(unittest.TestCase):
         # Restaurar el nombre original
         import app
         app.DB_NAME = self.original_db
-        import database_setup
+        import setup.database_setup as database_setup
         database_setup.DB_NAME = self.original_db
 
     def test_connect_db(self):

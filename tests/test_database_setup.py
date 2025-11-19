@@ -2,7 +2,7 @@ import unittest
 import sqlite3
 import os
 import json
-from database_setup import crear_base_de_datos, DB_NAME
+from setup.database_setup import crear_base_de_datos, DB_NAME
 
 class TestDatabaseSetup(unittest.TestCase):
     def setUp(self):
@@ -10,7 +10,7 @@ class TestDatabaseSetup(unittest.TestCase):
         self.test_db = 'test_stock.db'
         self.original_db = DB_NAME
         # Cambiar el nombre de la base de datos en el módulo
-        import database_setup
+        import setup.database_setup as database_setup
         database_setup.DB_NAME = self.test_db
         crear_base_de_datos()
 
@@ -19,7 +19,7 @@ class TestDatabaseSetup(unittest.TestCase):
         if os.path.exists(self.test_db):
             os.remove(self.test_db)
         # Restaurar el nombre original
-        import database_setup
+        import setup.database_setup as database_setup
         database_setup.DB_NAME = self.original_db
 
     def test_tablas_creadas(self):
