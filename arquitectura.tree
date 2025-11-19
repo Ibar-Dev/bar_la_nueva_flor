@@ -1,0 +1,30 @@
+.
+|-- README.md
+|-- app.py
+|-- app.spec
+|-- build
+|   `-- app
+|       |-- Analysis-00.toc
+|       |-- EXE-00.toc
+|       |-- PKG-00.toc
+|       |-- PYZ-00.pyz
+|       |-- PYZ-00.toc
+|       |-- app.pkg
+|       |-- base_library.zip
+|       |-- localpycs
+|       |   |-- pyimod01_archive.pyc
+|       |   |-- pyimod02_importers.pyc
+|       |   |-- pyimod03_ctypes.pyc
+|       |   |-- pyimod04_pywin32.pyc
+|       |   `-- struct.pyc
+|       |-- warn-app.txt
+|       `-- xref-app.html
+|-- database_setup.py
+|-- dist
+|   `-- app.exe
+|-- requirements.txt
+|-- stock.db
+`-- web
+    `-- index.html
+
+5 directories, 22 files

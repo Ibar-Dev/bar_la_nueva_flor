@@ -1,0 +1,13 @@
+# Ignorar archivos de base de datos
+*.db
+
+# Ignorar logs y archivos temporales
+*.log
+
+# Ignorar carpetas de entorno virtual
+venv/
+.venv/
+
+# Ignorar archivos de Python compilados
+pycache/
+*.pyc
