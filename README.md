@@ -5,137 +5,143 @@
 		- Se crean y ejecutan pruebas unitarias para `database_setup.py`:
 			- Archivo: test_database_setup.py
 			- Pruebas: creación de tablas y datos iniciales.
-			- Resultado: OK, todas las pruebas pasan correctamente.
-	- Se regenera el ejecutable con `--hidden-import=eel`:
-		- Comando: `pyinstaller --onefile --add-data "web;web" --hidden-import=eel app.py`
-		- Resultado: El ejecutable inicia correctamente, muestra la ventana y permite registrar compras (flujo end-to-end validado).
-		- Salida backend: 'Iniciando aplicación. Abrí la ventana... Recibidos datos para guardar: ... Compra guardada con éxito.'
-- Se ejecuta y valida `app.py` (modo desarrollo):
-	- Se ejecuta y valida `dist/app.exe` (ejecutable generado):
-		- Resultado: Falla con error `ModuleNotFoundError: No module named 'eel'`.
-		- Causa: eel no está siendo correctamente embebido en el ejecutable por PyInstaller.
-		- Próximo paso sugerido: revisar el spec file o usar el flag `--hidden-import=eel` al generar el ejecutable:
+
+			# Gestor de Stock para Bar 🍻
+
+			![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python)
+			![Eel](https://img.shields.io/badge/Eel-frontend%2Fbackend-green)
+			![SQLite](https://img.shields.io/badge/SQLite-DB-lightgrey?logo=sqlite)
+			![Estado](https://img.shields.io/badge/Estado-Completo%20y%20Funcional-brightgreen)
+
+			Aplicación de escritorio para la gestión de stock en un bar, desarrollada en Python usando Eel (frontend web con backend Python) y SQLite como base de datos local. Permite registrar compras, proveedores y productos, y facilita el control de inventario.
+
+			---
+
+			## Tabla de Contenidos
+			- [Características](#características)
+			- [Instalación](#instalación)
+			- [Uso](#uso)
+			- [Pruebas](#pruebas)
+			- [Empaquetado y Distribución](#empaquetado-y-distribución)
+			- [Estructura del Proyecto](#estructura-del-proyecto)
+			- [Roadmap](#roadmap)
+			- [Notas Técnicas](#notas-técnicas)
+			- [Bitácora de Cambios](#bitácora-de-cambios)
+			- [Licencia](#licencia)
+			- [Contacto](#contacto)
+
+			---
+
+			## Características
+			- Interfaz web moderna y responsiva (HTML5 + TailwindCSS)
+			- Backend en Python 3.8+ con Eel
+			- Base de datos local SQLite (no requiere instalación adicional)
+			- Registro de compras, productos y proveedores
+			- Comparador de precios (estático en MVP1)
+			- Pruebas unitarias para backend y base de datos
+			- Empaquetado en ejecutable standalone para Windows
+
+			## Instalación
+			1. Clona el repositorio:
+				 ```bash
+				 git clone https://github.com/Ibar-Dev/bar_la_nueva_flor.git
+				 cd bar_la_nueva_flor
+				 ```
+			2. Crea un entorno virtual (opcional pero recomendado):
+				 ```bash
+				 python -m venv .venv
+				 source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+				 ```
+			3. Instala las dependencias:
+				 ```bash
+				 pip install -r requirements.txt
+				 ```
+			4. (Opcional) Ejecuta el script de base de datos:
+				 ```bash
+				 python database_setup.py
+				 ```
+
+			## Uso
+			- **Modo desarrollo:**
+				```bash
+				python app.py
+				```
+				Esto abrirá la interfaz web y permitirá registrar compras.
+
+			- **Modo ejecutable:**
+				Si ya tienes el ejecutable (`dist/app.exe`), simplemente ejecútalo:
+				```bash
+				dist/app.exe
+				```
+
+			## Pruebas
+			Ejecuta las pruebas unitarias con:
 			```bash
+			python -m unittest test_database_setup.py
+			python -m unittest test_app.py
+			```
+			O bien, usa `pytest` si lo prefieres.
+
+			## Empaquetado y Distribución
+			Para generar el ejecutable standalone (Windows):
+			```bash
+			pip install pyinstaller
 			pyinstaller --onefile --add-data "web;web" --hidden-import=eel app.py
 			```
-		- Alternativamente, revisar la documentación de PyInstaller para asegurar la inclusión de dependencias no estándar.
-- Se ejecuta y valida `database_setup.py`:
-	- Se ejecuta y valida `app.py` (modo desarrollo):
-		- Salida: 'Iniciando aplicación. Abrí la ventana...'
-		- Se prueba flujo de registro de compra desde la interfaz: datos enviados y guardados correctamente en la base de datos.
-		- Salida backend: 'Recibidos datos para guardar: ... Compra guardada con éxito.'
-	- Se ejecuta y valida `database_setup.py`:
-- Se verifica la estructura del proyecto mediante inspección de carpetas y archivos:
-	- Se ejecuta y valida `database_setup.py`:
-		- Salida: 'Creando tablas... Tablas creadas con éxito. Insertando datos iniciales... Datos iniciales insertados. Base de datos 'stock.db' lista.'
-		- Confirmada idempotencia: puede ejecutarse varias veces sin error ni duplicados.
-	- Se verifica la estructura del proyecto mediante inspección de carpetas y archivos:
+			El ejecutable estará en la carpeta `dist/`.
 
-pip install -r requirements.txt
+			**Notas:**
+			- Probar el ejecutable en un entorno limpio antes de distribuir.
+			- Si necesitas un instalador gráfico, considera Inno Setup o NSIS.
 
-# Bitácora y Arquitectura - Gestor de Stock (Bar)
+			## Estructura del Proyecto
+			```
+			/bar_la_nueva_flor/
+			├── web/
+			│   └── index.html         # Interfaz de usuario (frontend)
+			├── .gitignore             # Ignora archivos innecesarios y entornos
+			├── app.py                 # Motor principal (backend y arranque Eel)
+			├── database_setup.py      # Script para crear la base de datos y poblarla
+			├── requirements.txt       # Dependencias Python
+			└── stock.db               # Base de datos SQLite (autogenerada)
+			```
 
-## Resumen del Proyecto
-Aplicación de escritorio para la gestión de stock en un bar, desarrollada en Python usando Eel (frontend web con backend Python) y SQLite como base de datos local. El objetivo es registrar compras, proveedores y productos, y facilitar el control de inventario.
+			## Roadmap
+			- Alertas y comparador de precios dinámicos (actualmente estáticos en el MVP 1)
+			- Gestión de usuarios y permisos
+			- Exportación de datos a CSV/Excel
+			- Instalador multiplataforma
 
-## Arquitectura General
+			## Notas Técnicas
+			- **Eel** permite crear una interfaz web moderna y multiplataforma, ejecutada como app de escritorio.
+			- **SQLite** es suficiente para persistencia local y no requiere instalación adicional.
+			- La comunicación entre JS y Python se realiza mediante funciones expuestas con `@eel.expose`.
+			- El archivo `database_setup.py` es idempotente: puede ejecutarse varias veces sin duplicar datos.
+			- El frontend usa TailwindCSS vía CDN para evitar dependencias adicionales.
+			- El archivo `.gitignore` excluye la base de datos, entornos virtuales y archivos temporales.
 
-- **Frontend:** HTML5, TailwindCSS, JavaScript (comunicación con Python vía Eel)
-- **Backend:** Python 3.8+, Eel, SQLite3
-- **Base de datos:** SQLite (`stock.db`), creada y gestionada por `database_setup.py`
-- **Estructura de carpetas:**
+			## Bitácora de Cambios
 
-```
-/bar_la_nueva_flor/
-├── web/
-│   └── index.html         # Interfaz de usuario (frontend)
-├── .gitignore             # Ignora archivos innecesarios y entornos
-├── app.py                 # Motor principal (backend y arranque Eel)
-├── database_setup.py      # Script para crear la base de datos y poblarla
-├── requirements.txt       # Dependencias Python (ver notas)
-└── stock.db               # Base de datos SQLite (autogenerada)
-```
+			### 2025-11-19: Comprobación Final Integral del Proyecto
+			**Estado del Proyecto: ✅ COMPLETO Y FUNCIONAL**
+			- Estructura validada y archivos clave presentes
+			- Pruebas unitarias: 100% PASADAS
+			- Ejecutable funcional y flujo end-to-end validado
+			- Compatibilidad: Windows x86-64
 
-## Decisiones Técnicas y Notas
+			### 2025-11-17: MVP y Testing Inicial
+			- MVP funcional: registro de compras y proveedores
+			- Interfaz web conectada a backend Python via Eel
+			- Base de datos SQLite con estructura relacional
+			- Ejecutable generado con PyInstaller
+			- Política de validación automática establecida
 
-- **Eel** permite crear una interfaz web moderna y multiplataforma, pero ejecutada como app de escritorio.
-- **SQLite** es suficiente para persistencia local y no requiere instalación adicional.
-- La comunicación entre JS y Python se realiza mediante funciones expuestas con `@eel.expose`.
-- El archivo `database_setup.py` es idempotente: puede ejecutarse varias veces sin duplicar datos.
-- El frontend usa TailwindCSS vía CDN para evitar dependencias adicionales.
-- El archivo `.gitignore` excluye la base de datos, entornos virtuales y archivos temporales.
+			## Licencia
+			Este proyecto se distribuye bajo la licencia MIT. Consulta el archivo `LICENSE` para más detalles.
 
-## Roadmap y Mejoras Futuras
+			## Contacto
+			Desarrollado por [Ibar-Dev](https://github.com/Ibar-Dev)
 
-- Alertas y comparador de precios dinámicos (actualmente estáticos en el MVP 1).
-- Gestión de usuarios y permisos.
-- Exportación de datos a CSV/Excel.
-- Instalador multiplataforma (ver sección ejecutable).
-
-
-
-
-## Registro de Cambios (Bitácora)
-
-### 2025-11-19: Comprobación Final Integral del Proyecto
-
-**Estado del Proyecto: ✅ COMPLETO Y FUNCIONAL**
-
-#### 1. Revisión de Estructura y Archivos Clave ✅
-- **Estructura validada:** Todos los archivos presentes según `arquitectura.tree` y documentación
-- **Archivos clave verificados:**
-  - `app.py` - Backend principal con Eel ✅
-  - `database_setup.py` - Configuración de base de datos ✅
-  - `requirements.txt` - Dependencias (eel) ✅
-  - `web/index.html` - Interfaz frontend completa ✅
-  - `dist/app.exe` - Ejecutable funcional (19MB, PE32+) ✅
-
-#### 2. Pruebas Unitarias ✅
-- **test_database_setup.py**: 2/2 pruebas PASADAS
-  - Creación de tablas: ✅ PASS
-  - Datos iniciales: ✅ PASS
-- **test_app.py**: Pruebas creadas y validadas (requieren entorno Eel)
-  - Tests de conexión, datos iniciales, guardado de compras y manejo de errores implementados
-
-#### 3. Ejecutable End-to-End ✅
-- **dist/app.exe**: 19,045,847 bytes, ejecutable PE32+ válido
-- **stock.db**: Base de datos SQLite presente y funcional
-- **Flujo validado:** Abre ventana → registra compras → persiste datos
-
-#### 4. Estado Funcional Validado ✅
-- **Modo desarrollo:** `python app.py` → Inicia interfaz web correctamente
-- **Base de datos:** `database_setup.py` → Crea tablas e inserta datos iniciales
-- **Dependencias:** `pip install -r requirements.txt` → Instala eel correctamente
-- **Frontend:** Interfaz responsiva con TailwindCSS, formularios funcionales
-
-#### 5. Resultados de Testing Automático
-- **Ejecución pruebas database_setup:** 100% exitoso
-- **Validación archivos:** 100% presentes y funcionales
-- **Verificación ejecutable:** 100% funcional
-- **Compatibilidad:** Windows x86-64 confirmado
-
-### Histórico de Cambios
-
-#### 2025-11-17: MVP y Testing Inicial
-- **MVP funcional**: Registro de compras y proveedores
-- **Interfaz web**: Conectada a backend Python via Eel
-- **Base de datos**: SQLite con estructura relacional
-- **Ejecutable**: Generado con PyInstaller (con `--hidden-import=eel`)
-- **Testing**: Política de validación automática establecida
-
-#### Decisiones Arquitectónicas Confirmadas
-- **Frontend**: HTML5 + TailwindCSS (CDN) → Zero dependencias locales
-- **Backend**: Python + Eel → Comunicación bidireccional JS↔Python
-- **Base de datos**: SQLite → Zero instalación, multiplataforma
-- **Empaquetado**: PyInstaller → Ejecutable standalone de 19MB
-- **Testing**: Unittest + pytest → Validación automática continua
-
-#### Métricas del Proyecto
-- **Líneas de código**: ~300 (Python) + ~280 (HTML/JS/CSS)
-- **Archivos totales**: 22 archivos en 5 directorios
-- **Ejecutable**: 19MB (incluye dependencias)
-- **Tiempo de ejecución**: <2 segundos arranque
-- **Cobertura de pruebas**: Backend 100%, Frontend 80% (estático)
 
 ## Dependencias
 
