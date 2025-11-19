@@ -24,6 +24,14 @@ PROVEEDORES_INICIALES = [
     ("Lacteos S.A.",)
 ]
 
+CONFIGURACION_DEFAULT = [
+    ('umbral_exceso_stock', '10.0', 'Kg máximo antes de alerta'),
+    ('dias_vencimiento_alerta', '7', 'Días antes de alertar vencimiento'),
+    ('dias_sin_compra_alerta', '30', 'Días sin compra para alertar'),
+    ('variacion_precio_alerta', '0.15', 'Variación de precio para alerta (15%)'),
+    ('max_dias_analisis', '730', 'Máximo días para análisis (2 años)')
+]
+
 def crear_base_de_datos():
     try:
         conn = sqlite3.connect(DB_NAME)
@@ -64,13 +72,24 @@ def crear_base_de_datos():
         )
         ''')
 
+        # Tabla de Configuracion para umbrales dinámicos
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS Configuracion (
+            clave TEXT PRIMARY KEY,
+            valor TEXT NOT NULL,
+            descripcion TEXT,
+            fecha_modificacion TEXT DEFAULT CURRENT_TIMESTAMP
+        )
+        ''')
+
         print("Tablas creadas con éxito.")
 
         # Insertar datos iniciales (ignorando si ya existen)
         print("Insertando datos iniciales...")
         cursor.executemany("INSERT OR IGNORE INTO Productos (nombre, unidades_validas_json) VALUES (?, ?)", PRODUCTOS_INICIALES)
         cursor.executemany("INSERT OR IGNORE INTO Proveedores (nombre) VALUES (?)", PROVEEDORES_INICIALES)
-        
+        cursor.executemany("INSERT OR IGNORE INTO Configuracion (clave, valor, descripcion) VALUES (?, ?, ?)", CONFIGURACION_DEFAULT)
+
         conn.commit()
         print("Datos iniciales insertados.")
 

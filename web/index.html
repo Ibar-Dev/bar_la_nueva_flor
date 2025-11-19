@@ -247,7 +247,7 @@
             console.log("Enviando a Python:", datos);
             
             // 2. Enviar datos a Python usando Eel
-            const resultado = await eel.guardar_compra(datos)();
+            const resultado = await eel.guardar_compra_validada(datos)();
             
             // 3. Mostrar feedback al usuario
             if (resultado.success) {
