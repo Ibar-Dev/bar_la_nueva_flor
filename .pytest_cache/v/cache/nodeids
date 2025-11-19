@@ -1,0 +1,4 @@
+[
+  "test_database_setup.py::TestDatabaseSetup::test_datos_iniciales",
+  "test_database_setup.py::TestDatabaseSetup::test_tablas_creadas"
+]

@@ -2,16 +2,17 @@ import unittest
 import sqlite3
 import os
 import json
-from app import connect_db, get_datos_iniciales, guardar_compra, DB_NAME
+from src.database import connect_db, get_datos_iniciales, guardar_compra
+from app import guardar_compra_validada
 
 class TestAppBackend(unittest.TestCase):
     def setUp(self):
         # Usar una base de datos temporal para pruebas
         self.test_db = 'test_stock_app.db'
-        self.original_db = DB_NAME
         # Cambiar el nombre de la base de datos en el módulo
-        import app
-        app.DB_NAME = self.test_db
+        import src.database
+        self.original_db = src.database.DB_NAME
+        src.database.DB_NAME = self.test_db
         # Crear base de datos y datos iniciales
         import setup.database_setup as database_setup
         database_setup.DB_NAME = self.test_db
@@ -22,8 +23,8 @@ class TestAppBackend(unittest.TestCase):
         if os.path.exists(self.test_db):
             os.remove(self.test_db)
         # Restaurar el nombre original
-        import app
-        app.DB_NAME = self.original_db
+        import src.database
+        src.database.DB_NAME = self.original_db
         import setup.database_setup as database_setup
         database_setup.DB_NAME = self.original_db
 
@@ -74,6 +75,21 @@ class TestAppBackend(unittest.TestCase):
         resultado = guardar_compra(datos)
         self.assertFalse(resultado['success'])
         self.assertIn('error', resultado)
+
+    def test_guardar_compra_validada(self):
+        """Test de la función con validación del app.py"""
+        datos = {
+            'producto': 'Harina',
+            'proveedor': 'Distribuidora Central',
+            'cantidad': 2,
+            'unidad': 'kg',
+            'precio': 20.5,
+            'fecha_compra': '2025-11-17',
+            'descuento': '0'
+        }
+        resultado = guardar_compra_validada(datos)
+        self.assertTrue(resultado['success'])
+        self.assertIn('compra_id', resultado)
 
 if __name__ == '__main__':
     unittest.main()

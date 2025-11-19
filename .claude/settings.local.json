@@ -4,7 +4,9 @@
       "Bash(python -m pytest:*)",
       "Bash(pip install:*)",
       "Bash(python:*)",
-      "Bash(pip freeze:*)"
+      "Bash(pip freeze:*)",
+      "Bash(pyinstaller:*)",
+      "Bash(dir:*)"
     ],
     "deny": [],
     "ask": []

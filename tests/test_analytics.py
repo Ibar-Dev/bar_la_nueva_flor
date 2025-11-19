@@ -36,8 +36,9 @@ class TestAnalytics(unittest.TestCase):
         import src.database
         src.database.DB_NAME = str(cls.db_path)
 
-        # Crear estructura básica de la base de datos
-        cls._setup_test_database()
+        # Crear instancia para setup
+        test_instance = cls()
+        test_instance._setup_test_database()
 
     @classmethod
     def tearDownClass(cls):
