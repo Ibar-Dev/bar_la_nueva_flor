@@ -1,0 +1,30 @@
+🍷 GESTIÓN DE BAR - INSTRUCCIONES 🍷
+
+1️⃣ Copia la carpeta "GestionBar" al Escritorio del PC
+2️⃣ Haz doble clic en "BarStockManager.exe"
+3️⃣ ¡Listo! La aplicación se abrirá automáticamente
+
+📝 NOTAS IMPORTANTES:
+• No necesita instalación - es totalmente portable
+• No necesita Python ni nada adicional instalado
+• Funciona en Windows 7, 10 y 11
+• Los datos se guardan automáticamente en la misma carpeta
+• La base de datos se crea la primera vez que se ejecuta
+
+🎛️ CARACTERÍSTICAS DEL PROGRAMA:
+• Gestión completa de inventario de bar
+• Control de stock de bebidas y productos
+• Análisis de ventas y consumos
+• Backup automático de datos
+• Interfaz fácil de usar
+
+🆘 ¿PROBLEMAS?
+• Si el antivirus lo bloquea: Es un falso positivo, añadir a la lista blanca
+• Si no ejecuta: Clic derecho → "Ejecutar como administrador"
+• Para apoyo técnico: Contacta con quien te entregó el programa
+
+💾 COPIAS DE SEGURIDAD:
+• El programa crea backups automáticos en la carpeta
+• Se recomienda copiar la carpeta completa de vez en cuando
+
+¡Disfruta del programa! 🎉
