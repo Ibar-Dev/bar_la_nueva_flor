@@ -3,7 +3,23 @@
 
 import eel
 import json
-from src.database import get_datos_iniciales, guardar_compra, verificar_conexion
+from src.database import (
+    get_datos_iniciales as db_get_datos_iniciales,
+    guardar_compra,
+    verificar_conexion,
+    obtener_todos_los_productos,
+    crear_producto,
+    actualizar_producto,
+    eliminar_producto,
+    obtener_todos_los_proveedores,
+    crear_proveedor,
+    actualizar_proveedor,
+    eliminar_proveedor,
+    obtener_todas_las_notas,
+    crear_nota,
+    actualizar_nota,
+    eliminar_nota
+)
 from src.validators import validar_compra
 from src.utils import setup_logger, crear_directorios, generar_timestamp
 from src.analytics import (
@@ -30,7 +46,7 @@ eel.init('web')
 def get_datos_iniciales():
     """Busca los productos y proveedores para llenar los menús <select> al cargar la app."""
     logger.info("Solicitando datos iniciales para la interfaz")
-    return get_datos_iniciales()
+    return db_get_datos_iniciales()
 
 @eel.expose
 def guardar_compra_validada(datos):
@@ -77,6 +93,53 @@ def generar_alertas():
     logger.info("Generación de alertas solicitada")
     return alerts_generar_alertas()
 
+# --- Funciones para Gestión de Productos ---
+
+@eel.expose
+def get_todos_los_productos():
+    """Obtiene todos los productos con sus detalles para administración."""
+    logger.info("Solicitando todos los productos para administración")
+    return obtener_todos_los_productos()
+
+@eel.expose
+def crear_nuevo_producto(nombre: str, unidades_validas: list):
+    """Crea un nuevo producto."""
+    logger.info(f"Creando nuevo producto: {nombre} con unidades: {unidades_validas}")
+    resultado = crear_producto(nombre, unidades_validas)
+
+    if resultado.get("success"):
+        logger.info(f"Producto creado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al crear producto: {resultado}")
+
+    return resultado
+
+@eel.expose
+def actualizar_producto_existente(producto_id: int, nombre: str, unidades_validas: list):
+    """Actualiza un producto existente."""
+    logger.info(f"Actualizando producto ID {producto_id}: {nombre} con unidades: {unidades_validas}")
+    resultado = actualizar_producto(producto_id, nombre, unidades_validas)
+
+    if resultado.get("success"):
+        logger.info(f"Producto actualizado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al actualizar producto: {resultado}")
+
+    return resultado
+
+@eel.expose
+def eliminar_producto_por_id(producto_id: int):
+    """Elimina un producto por su ID."""
+    logger.info(f"Eliminando producto con ID: {producto_id}")
+    resultado = eliminar_producto(producto_id)
+
+    if resultado.get("success"):
+        logger.info(f"Producto eliminado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al eliminar producto: {resultado}")
+
+    return resultado
+
 @eel.expose
 def exportar_analisis_csv(inicio, fin, producto=None):
     """Exporta análisis a CSV."""
@@ -112,6 +175,114 @@ def exportar_analisis_csv(inicio, fin, producto=None):
     except Exception as e:
         logger.error(f"Error exportando CSV: {e}")
         raise
+
+# --- Funciones para Gestión de Proveedores ---
+
+@eel.expose
+def get_todos_los_proveedores():
+    """Obtiene todos los proveedores con sus detalles para administración."""
+    logger.info("Solicitando todos los proveedores para administración")
+    return obtener_todos_los_proveedores()
+
+@eel.expose
+def crear_nuevo_proveedor(datos):
+    """Crea un nuevo proveedor."""
+    logger.info(f"Creando nuevo proveedor: {datos}")
+    resultado = crear_proveedor(datos)
+
+    if resultado.get("success"):
+        logger.info(f"Proveedor creado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al crear proveedor: {resultado}")
+
+    return resultado
+
+@eel.expose
+def actualizar_proveedor_existente(proveedor_id, datos):
+    """Actualiza un proveedor existente."""
+    logger.info(f"Actualizando proveedor ID {proveedor_id}: {datos}")
+    resultado = actualizar_proveedor(proveedor_id, datos)
+
+    if resultado.get("success"):
+        logger.info(f"Proveedor actualizado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al actualizar proveedor: {resultado}")
+
+    return resultado
+
+@eel.expose
+def eliminar_proveedor_por_id(proveedor_id):
+    """Elimina un proveedor por su ID."""
+    logger.info(f"Eliminando proveedor con ID: {proveedor_id}")
+    resultado = eliminar_proveedor(proveedor_id)
+
+    if resultado.get("success"):
+        logger.info(f"Proveedor eliminado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al eliminar proveedor: {resultado}")
+
+    return resultado
+
+@eel.expose
+def get_proveedor_por_id(proveedor_id):
+    """Obtiene un proveedor por su ID."""
+    logger.info(f"Obteniendo proveedor con ID: {proveedor_id}")
+    # Esta función necesita ser implementada en database.py
+    return {"success": False, "error": "Función no implementada"}
+
+# --- Funciones para Sistema de Notas ---
+
+@eel.expose
+def get_todas_las_notas(filtros=None):
+    """Obtiene todas las notas con filtros opcionales."""
+    logger.info("Solicitando todas las notas")
+    return obtener_todas_las_notas(filtros)
+
+@eel.expose
+def crear_nueva_nota(datos):
+    """Crea una nueva nota."""
+    logger.info(f"Creando nueva nota: {datos.get('titulo')}")
+    resultado = crear_nota(datos)
+
+    if resultado.get("success"):
+        logger.info(f"Nota creada exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al crear nota: {resultado}")
+
+    return resultado
+
+@eel.expose
+def actualizar_nota_existente(nota_id, datos):
+    """Actualiza una nota existente."""
+    logger.info(f"Actualizando nota ID {nota_id}: {datos.get('titulo')}")
+    resultado = actualizar_nota(nota_id, datos)
+
+    if resultado.get("success"):
+        logger.info(f"Nota actualizada exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al actualizar nota: {resultado}")
+
+    return resultado
+
+@eel.expose
+def eliminar_nota_por_id(nota_id):
+    """Elimina una nota por su ID."""
+    logger.info(f"Eliminando nota con ID: {nota_id}")
+    resultado = eliminar_nota(nota_id)
+
+    if resultado.get("success"):
+        logger.info(f"Nota eliminada exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al eliminar nota: {resultado}")
+
+    return resultado
+
+@eel.expose
+def get_nota_por_id(nota_id):
+    """Obtiene una nota por su ID."""
+    logger.info(f"Obteniendo nota con ID: {nota_id}")
+    # Esta función necesita ser implementada en database.py
+    return {"success": False, "error": "Función no implementada"}
 
 # --- Iniciar la Aplicación ---
 

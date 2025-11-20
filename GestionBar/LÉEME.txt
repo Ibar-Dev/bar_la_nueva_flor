@@ -12,11 +12,42 @@
 • La base de datos se crea la primera vez que se ejecuta
 
 🎛️ CARACTERÍSTICAS DEL PROGRAMA:
-• Gestión completa de inventario de bar
-• Control de stock de bebidas y productos
-• Análisis de ventas y consumos
-• Backup automático de datos
-• Interfaz fácil de usar
+• ✅ **GESTIÓN COMPLETA DE PRODUCTOS**: Añade, edita y elimina productos fácilmente
+• ✅ **CONTROL DE INVENTARIO**: Registro de compras y stock en tiempo real
+• ✅ **GESTIÓN DE PROVEEDORES**: Administra datos completos de proveedores (contacto, teléfono, email, etc.)
+• ✅ **SISTEMA DE NOTAS**: Blog personal para dejar sugerencias y reportar problemas
+• ✅ **INTERFAZ MODERNA**: Diseño intuitivo con pestañas organizadas
+• ✅ **UNIDADES PERSONALIZADAS**: Define tus propias unidades (litros, botellas, cajas, etc.)
+• ✅ **BACKUP AUTOMÁTICO**: Copias de seguridad automáticas de tus datos
+• ✅ **VALIDACIONES ROBUSTAS**: Protección contra errores y datos duplicados
+• ✅ **FEEDBACK VISUAL**: Confirmaciones instantáneas de todas las acciones
+
+🎯 **CÓMO USAR LA GESTIÓN DE PRODUCTOS:**
+1. Ve a la pestaña "📦 Administrar Productos"
+2. Haz clic en "➕ Añadir Nuevo Producto"
+3. Escribe el nombre (ej: "Cerveza", "Vino Tinto")
+4. Añade las unidades válidas (ej: "litro", "botella", "caja")
+5. ¡Guarda y listo para usar en compras!
+
+🛒 **CÓMO REGISTRAR COMPRAS:**
+1. En el Dashboard o pestaña "🛒 Registrar Compra"
+2. Selecciona el producto y unidad
+3. Ingresa cantidad, precio y proveedor
+4. ¡Guarda y se actualiza automáticamente!
+
+👥 **CÓMO ADMINISTRAR PROVEEDORES:**
+1. Ve a la pestaña "👥 Administrar Proveedores"
+2. Haz clic en "➕ Añadir Proveedor" para crear nuevos
+3. Ingresa todos los datos: nombre, contacto, teléfono, email, dirección, CIF/NIF
+4. Puedes editar o eliminar proveedores existentes
+5. ¡Todos los datos quedan registrados para tu uso futuro!
+
+📝 **CÓMO USAR EL SISTEMA DE NOTAS:**
+1. Ve a la pestaña "📝 Notas"
+2. Haz clic en "➕ Crear Nota" para dejar tus anotaciones
+3. Selecciona categoría: Ideas de Funcionalidad, Problemas, Mejoras, etc.
+4. Asigna prioridad (Baja, Media, Alta) y estado (Activa, En Progreso, Resuelta)
+5. ¡Tus notas me ayudan a mejorar continuamente la aplicación!
 
 🆘 ¿PROBLEMAS?
 • Si el antivirus lo bloquea: Es un falso positivo, añadir a la lista blanca
@@ -26,5 +57,8 @@
 💾 COPIAS DE SEGURIDAD:
 • El programa crea backups automáticos en la carpeta
 • Se recomienda copiar la carpeta completa de vez en cuando
+
+🎉 **¡AHORA PUEDES GESTIONAR TU BAR COMPLETAMENTE!**
+Añade tus propios productos: cervezas, vinos, refrescos, licores, etc.
 
 ¡Disfruta del programa! 🎉

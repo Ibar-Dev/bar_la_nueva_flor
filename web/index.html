@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- SCRIPT DE EEL: Necesario para la comunicación Python <-> JS -->
     <script type="text/javascript" src="/eel.js"></script>
-    
+
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
@@ -20,8 +20,35 @@
         .price-red {
             background-color: #450a0a; color: #fca5a5; border: 1px solid #7f1d1d;
         }
+        .tab-button {
+            transition: all 0.3s ease;
+        }
+        .tab-button.active {
+            background-color: #2563eb; border-bottom: 2px solid #3b82f6;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
         select:disabled {
             background-color: #374151; opacity: 0.5; cursor: not-allowed;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         /* Mensaje de feedback (éxito/error) */
         #feedback {
@@ -35,250 +62,1376 @@
 
         <!-- Cabecera -->
         <header class="mb-8">
-            <h1 class="text-3xl font-bold text-gray-100">Gestión de Stock: Bar de Jose</h1>
-            <p class="text-lg text-gray-400">Tu panel de control para inventario, compras y proveedores.</p>
+            <h1 class="text-3xl font-bold text-gray-100">🍷 Gestión de Stock - Bar de Jose</h1>
+            <p class="text-lg text-gray-400">Tu panel de control completo para inventario, compras y administración.</p>
         </header>
 
-        <!-- Sección Principal: Alertas y Registro -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <!-- Navegación por Pestañas -->
+        <div class="border-b border-gray-700 mb-8">
+            <nav class="-mb-px flex space-x-8">
+                <button onclick="showTab('dashboard')" class="tab-button active py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    📊 Dashboard
+                </button>
+                <button onclick="showTab('compras')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    🛒 Registrar Compra
+                </button>
+                <button onclick="showTab('productos')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    📦 Administrar Productos
+                </button>
+                <button onclick="showTab('proveedores')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    👥 Administrar Proveedores
+                </button>
+                <button onclick="showTab('notas')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    📝 Notas
+                </button>
+                <button onclick="showTab('analytics')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    📈 Análisis
+                </button>
+            </nav>
+        </div>
 
-            <!-- Columna de Alertas (El núcleo de la idea) -->
-            <div class="lg:col-span-1 bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
-                <h2 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-700">Alertas Importantes</h2>
-                
-                <!-- (Por ahora, estas alertas son estáticas. Las haremos dinámicas en el MVP 2) -->
-                
-                <div class="bg-yellow-900/30 border-l-4 border-yellow-600 text-yellow-300 p-4 rounded-lg shadow-sm">
-                    <div class="flex">
-                        <div class="py-1">
-                            <svg class="w-6 h-6 text-yellow-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                        </div>
-                        <div>
-                            <p class="font-bold">Exceso de Stock Detectado</p>
-                            <p class="text-sm">Tienes **15 kg de Pollo** en inventario (tu umbral es 10 kg).</p>
+        <!-- Contenido de las Pestañas -->
+
+        <!-- Pestaña: Dashboard -->
+        <div id="dashboard" class="tab-content active">
+            <!-- Sección Principal: Alertas y Registro -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+
+                <!-- Columna de Alertas -->
+                <div class="lg:col-span-1 bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4 border-b pb-2 border-gray-700">🚨 Alertas Importantes</h2>
+
+                    <div id="alertas-container">
+                        <div class="bg-yellow-900/30 border-l-4 border-yellow-600 text-yellow-300 p-4 rounded-lg shadow-sm">
+                            <div class="flex">
+                                <div class="py-1">
+                                    <svg class="w-6 h-6 text-yellow-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="font-bold">Cargando alertas...</p>
+                                    <p class="text-sm">Obteniendo información actualizada del inventario.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div class="bg-red-900/30 border-l-4 border-red-600 text-red-300 p-4 rounded-lg shadow-sm mt-4">
-                    <p class="font-bold">Próximo Vencimiento</p>
-                    <p class="text-sm">**5 litros de Leche** (Proveedor: Lacteos S.A.) vencen en 2 días.</p>
+
+                <!-- Columna de Registro Rápido -->
+                <div class="lg:col-span-2 bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+                    <div class="flex justify-between items-center mb-4 border-b pb-2 border-gray-700">
+                        <h2 class="text-xl font-semibold">🚀 Registro Rápido de Compra</h2>
+                        <div id="feedback" class="text-sm opacity-0"></div>
+                    </div>
+
+                    <form id="form-compra-rapido" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                        <!-- Producto -->
+                        <div>
+                            <label for="producto-rapido" class="block text-sm font-medium text-gray-300">Producto <span class="text-red-400">*</span></label>
+                            <select id="producto-rapido" name="producto" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                                <option value="">-- Cargando productos... --</option>
+                            </select>
+                        </div>
+
+                        <!-- Proveedor -->
+                        <div>
+                            <label for="proveedor-rapido" class="block text-sm font-medium text-gray-300">Proveedor</label>
+                            <select id="proveedor-rapido" name="proveedor" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                                <option value="">-- Opcional --</option>
+                            </select>
+                        </div>
+
+                        <!-- Cantidad y Unidad -->
+                        <div class="grid grid-cols-3 gap-4">
+                            <div class="col-span-2">
+                                <label for="cantidad-rapido" class="block text-sm font-medium text-gray-300">Cantidad</label>
+                                <input type="number" name="cantidad" id="cantidad-rapido" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 5">
+                            </div>
+                            <div>
+                                <label for="unidad-rapido" class="block text-sm font-medium text-gray-300">Unidad <span class="text-red-400">*</span></label>
+                                <select id="unidad-rapido" name="unidad" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required disabled>
+                                    <option value="">-- Elige producto --</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Precio Total -->
+                        <div>
+                            <label for="precio-rapido" class="block text-sm font-medium text-gray-300">Precio Total (€)</label>
+                            <input type="number" step="0.01" name="precio" id="precio-rapido" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 15.50">
+                        </div>
+
+                        <!-- Fecha de Compra -->
+                        <div class="md:col-span-1">
+                            <label for="fecha_compra-rapido" class="block text-sm font-medium text-gray-300">Fecha de Compra</label>
+                            <input type="date" name="fecha_compra" id="fecha_compra-rapido" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" style="color-scheme: dark;">
+                        </div>
+
+                        <!-- Descuento -->
+                        <div class="md:col-span-1">
+                            <label for="descuento-rapido" class="block text-sm font-medium text-gray-300">Descuento (Opcional)</label>
+                            <input type="text" name="descuento" id="descuento-rapido" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 10% por volumen">
+                        </div>
+
+                        <!-- Botón de Guardar -->
+                        <div class="md:col-span-2 text-right">
+                            <button type="submit" class="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                                💾 Guardar Compra
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- Columna de Registro de Compra -->
-            <div class="lg:col-span-2 bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
-                <div class="flex justify-between items-center mb-4 border-b pb-2 border-gray-700">
-                    <h2 class="text-xl font-semibold">Registrar Nueva Compra</h2>
-                    <!-- Mensaje de Feedback -->
-                    <div id="feedback" class="text-sm opacity-0"></div>
+            <!-- Sección de Estadísticas Rápidas -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-blue-600 rounded-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Total Productos</p>
+                            <p class="text-2xl font-semibold text-gray-100" id="total-productos">-</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <form id="form-compra" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-green-600 rounded-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Compras Hoy</p>
+                            <p class="text-2xl font-semibold text-gray-100" id="compras-hoy">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-purple-600 rounded-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Proveedores</p>
+                            <p class="text-2xl font-semibold text-gray-100" id="total-proveedores">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-800 p-6 rounded-xl border border-gray-700">
+                    <div class="flex items-center">
+                        <div class="p-3 bg-yellow-600 rounded-lg">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-gray-400">Alertas Activas</p>
+                            <p class="text-2xl font-semibold text-gray-100" id="alertas-activas">-</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña: Registrar Compra (Formulario Completo) -->
+        <div id="compras" class="tab-content">
+            <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+                <div class="flex justify-between items-center mb-6 border-b pb-4 border-gray-700">
+                    <h2 class="text-2xl font-semibold">🛒 Formulario Completo de Compra</h2>
+                    <div id="feedback-compras" class="text-sm opacity-0"></div>
+                </div>
+
+                <form id="form-compra-completo" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
                     <!-- Producto -->
                     <div>
-                        <label for="producto" class="block text-sm font-medium text-gray-300">Producto <span class="text-red-400">*</span></label>
-                        <!-- CAMBIO: Opciones se cargarán dinámicamente -->
-                        <select id="producto" name="producto" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
+                        <label for="producto-completo" class="block text-sm font-medium text-gray-300">Producto <span class="text-red-400">*</span></label>
+                        <select id="producto-completo" name="producto" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required>
                             <option value="">-- Cargando productos... --</option>
                         </select>
                     </div>
 
                     <!-- Proveedor -->
                     <div>
-                        <label for="proveedor" class="block text-sm font-medium text-gray-300">Proveedor</label>
-                        <!-- CAMBIO: Opciones se cargarán dinámicamente -->
-                        <select id="proveedor" name="proveedor" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                        <label for="proveedor-completo" class="block text-sm font-medium text-gray-300">Proveedor</label>
+                        <select id="proveedor-completo" name="proveedor" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             <option value="">-- Opcional --</option>
                         </select>
                     </div>
 
-                    <!-- Cantidad y Unidad -->
-                    <div class="grid grid-cols-3 gap-4">
-                        <div class="col-span-2">
-                            <label for="cantidad" class="block text-sm font-medium text-gray-300">Cantidad</label>
-                            <input type="number" name="cantidad" id="cantidad" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 5">
-                        </div>
-                        <div>
-                            <label for="unidad" class="block text-sm font-medium text-gray-300">Unidad <span class="text-red-400">*</span></label>
-                            <select id="unidad" name="unidad" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required disabled>
-                                <option value="">-- Elige producto --</option>
-                            </select>
-                        </div>
+                    <!-- Cantidad -->
+                    <div>
+                        <label for="cantidad-completo" class="block text-sm font-medium text-gray-300">Cantidad <span class="text-red-400">*</span></label>
+                        <input type="number" name="cantidad" id="cantidad-completo" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 5" required>
+                    </div>
+
+                    <!-- Unidad -->
+                    <div>
+                        <label for="unidad-completo" class="block text-sm font-medium text-gray-300">Unidad <span class="text-red-400">*</span></label>
+                        <select id="unidad-completo" name="unidad" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" required disabled>
+                            <option value="">-- Elige producto --</option>
+                        </select>
                     </div>
 
                     <!-- Precio Total -->
                     <div>
-                        <label for="precio" class="block text-sm font-medium text-gray-300">Precio Total (€)</label>
-                        <input type="number" step="0.01" name="precio" id="precio" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 15.50">
+                        <label for="precio-completo" class="block text-sm font-medium text-gray-300">Precio Total (€) <span class="text-red-400">*</span></label>
+                        <input type="number" step="0.01" name="precio" id="precio-completo" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 15.50" required>
                     </div>
 
-                    <!-- Fecha de Compra (con override) -->
-                    <div class="md:col-span-1">
-                        <label for="fecha_compra" class="block text-sm font-medium text-gray-300">Fecha de Compra</label>
-                        <input type="date" name="fecha_compra" id="fecha_compra" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" style="color-scheme: dark;">
+                    <!-- Fecha de Compra -->
+                    <div>
+                        <label for="fecha_compra-completo" class="block text-sm font-medium text-gray-300">Fecha de Compra</label>
+                        <input type="date" name="fecha_compra" id="fecha_compra-completo" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" style="color-scheme: dark;">
                     </div>
 
-                    <!-- Descuento -->
-                    <div class="md:col-span-1">
-                        <label for="descuento" class="block text-sm font-medium text-gray-300">Descuento (Opcional)</label>
-                        <input type="text" name="descuento" id="descuento" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 10% por volumen">
+                    <!-- Descuento (toda la fila) -->
+                    <div class="md:col-span-2 lg:col-span-3">
+                        <label for="descuento-completo" class="block text-sm font-medium text-gray-300">Descuento (Opcional)</label>
+                        <input type="text" name="descuento" id="descuento-completo" class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: 10% por volumen, Cliente frecuente, Oferta especial">
                     </div>
 
-                    <!-- Botón de Guardar -->
-                    <div class="md:col-span-2 text-right">
-                        <button type="submit" class="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 py-2 px-6 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                            Guardar Compra
+                    <!-- Botón de Guardar (toda la fila) -->
+                    <div class="md:col-span-2 lg:col-span-3 text-right">
+                        <button type="submit" class="inline-flex justify-center rounded-lg border border-transparent bg-green-600 py-3 px-8 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                            ✅ Guardar Compra Completa
                         </button>
                     </div>
                 </form>
             </div>
         </div>
 
-        <!-- Sección de Comparación de Precios (El Semáforo) -->
-        <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
-            <h2 class="text-xl font-semibold mb-4 text-gray-100">Comparador de Precios: Patatas (por kg)</h2>
-            <!-- (Por ahora, esta tabla es estática. La haremos dinámica en el MVP 2) -->
-            <div class="overflow-x-auto rounded-lg border border-gray-700">
-                <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-700">
-                        <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Proveedor</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Última Compra</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Precio / kg</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Descuento Aplicado</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-gray-800 divide-y divide-gray-700">
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">Distribuidora Central</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">14/11/2025 (5 kg)</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                                <span class="px-3 py-1 rounded-full text-sm price-red">1.90 € / kg</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">Ninguno</td>
-                        </tr>
-                        <tr>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">Verdulería Pepe</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">12/11/2025 (10 kg)</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                                <span class="px-3 py-1 rounded-full text-sm price-green">1.88 € / kg</span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">Desc. por 10kg</td>
-                        </tr>
-                    </tbody>
-                </table>
+        <!-- Pestaña: Administrar Productos -->
+        <div id="productos" class="tab-content">
+            <!-- Cabecera con botón de añadir -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">📦 Administración de Productos</h2>
+                <button onclick="openModalProducto()" class="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    ➕ Añadir Nuevo Producto
+                </button>
+            </div>
+
+            <!-- Tabla de Productos -->
+            <div class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Unidades Válidas</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Total Compras</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-productos" class="bg-gray-800 divide-y divide-gray-700">
+                            <tr>
+                                <td colspan="5" class="px-6 py-4 text-center text-gray-400">
+                                    Cargando productos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña: Administrar Proveedores -->
+        <div id="proveedores" class="tab-content">
+            <!-- Cabecera con botón de añadir -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">👥 Administración de Proveedores</h2>
+                <button type="button" onclick="openModalProveedor()" class="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    ➕ Añadir Nuevo Proveedor
+                </button>
+            </div>
+
+            <!-- Tabla de Proveedores -->
+            <div class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">ID</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contacto</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Teléfono</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Email</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Compras</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-proveedores" class="bg-gray-800 divide-y divide-gray-700">
+                            <tr>
+                                <td colspan="9" class="px-6 py-4 text-center text-gray-400">
+                                    Cargando proveedores...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pestaña: Sistema de Notas -->
+        <div id="notas" class="tab-content">
+            <!-- Cabecera con botón de añadir -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">📝 Sistema de Notas</h2>
+                <button type="button" onclick="openModalNota()" class="inline-flex justify-center rounded-lg border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    ➕ Nueva Nota
+                </button>
+            </div>
+
+            <!-- Filtros y Búsqueda -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 mb-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Buscar</label>
+                        <input type="text" id="buscar-notas" placeholder="Buscar en notas..." class="w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Categoría</label>
+                        <select id="filtro-categoria" class="w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">Todas las categorías</option>
+                            <option value="Ideas de Funcionalidad">💡 Ideas de Funcionalidad</option>
+                            <option value="Reporte de Problemas">🐛 Reporte de Problemas</option>
+                            <option value="Mejoras de Interfaz">🎨 Mejoras de Interfaz</option>
+                            <option value="Sugerencias de Análisis">📊 Sugerencias de Análisis</option>
+                            <option value="Notas de Negocio">📋 Notas de Negocio</option>
+                            <option value="Problemas Técnicos">🔧 Problemas Técnicos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Prioridad</label>
+                        <select id="filtro-prioridad" class="w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">Todas las prioridades</option>
+                            <option value="baja">🟢 Baja</option>
+                            <option value="media">🟡 Media</option>
+                            <option value="alta">🟠 Alta</option>
+                            <option value="urgente">🔴 Urgente</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-300 mb-2">Estado</label>
+                        <select id="filtro-estado" class="w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
+                            <option value="">Todos los estados</option>
+                            <option value="activa">✅ Activa</option>
+                            <option value="en_progreso">🔄 En Progreso</option>
+                            <option value="resuelta">✅ Resuelta</option>
+                            <option value="cancelada">❌ Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex gap-2 mt-4">
+                    <button type="button" onclick="limpiarFiltrosNotas()" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700">
+                        🔄 Limpiar Filtros
+                    </button>
+                </div>
+            </div>
+
+            <!-- Grid de Notas -->
+            <div id="grid-notas" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Las notas se cargarán dinámicamente aquí -->
+            </div>
+        </div>
+
+        <!-- Pestaña: Análisis -->
+        <div id="analytics" class="tab-content">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Análisis de Volúmenes -->
+                <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4">📊 Análisis de Volúmenes</h2>
+                    <div class="text-gray-400">
+                        <p>Funcionalidad de análisis próximamente disponible...</p>
+                    </div>
+                </div>
+
+                <!-- Comparador de Precios -->
+                <div class="bg-gray-800 p-6 rounded-2xl shadow-lg border border-gray-700">
+                    <h2 class="text-xl font-semibold mb-4">💰 Comparador de Precios</h2>
+                    <div class="text-gray-400">
+                        <p>Funcionalidad de comparación próximamente disponible...</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- =========== LÓGICA DE JAVASCRIPT =========== -->
-    <script>
-        // --- Mapa de unidades (lo recibiremos de Python) ---
-        let unidadesValidasMap = {};
+    <!-- Modal para Añadir/Editar Producto -->
+    <div id="modalProducto" class="modal">
+        <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modalProductoTitle">📦 Añadir Nuevo Producto</h3>
+                <button onclick="closeModalProducto()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
 
-        // --- Elementos del DOM ---
-        const productoSelect = document.getElementById('producto');
-        const unidadSelect = document.getElementById('unidad');
-        const proveedorSelect = document.getElementById('proveedor');
-        const formCompra = document.getElementById('form-compra');
-        const fechaCompraInput = document.getElementById('fecha_compra');
-        const feedbackEl = document.getElementById('feedback');
+            <form id="form-producto-modal" class="space-y-4">
+                <!-- Nombre del Producto -->
+                <div>
+                    <label for="nombre-producto-modal" class="block text-sm font-medium text-gray-300">Nombre del Producto <span class="text-red-400">*</span></label>
+                    <input type="text" id="nombre-producto-modal" name="nombre" required
+                           class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                           placeholder="Ej: Coca-Cola">
+                </div>
 
-        // --- Lógica de Carga Inicial ---
-        document.addEventListener('DOMContentLoaded', async () => {
-            // 1. Poner fecha de hoy por defecto
-            fechaCompraInput.value = new Date().toISOString().split('T')[0];
-            
-            // 2. Pedir datos iniciales a Python
-            console.log("Pidiendo datos iniciales a Python...");
-            const datos = await eel.get_datos_iniciales()(); // Doble paréntesis es correcto para eel
-            
-            if (datos.error) {
-                console.error(datos.error);
-                productoSelect.innerHTML = '<option value="">Error al cargar</option>';
-                return;
-            }
-            
-            console.log("Datos recibidos:", datos);
-            
-            // 3. Guardar el mapa de unidades
-            unidadesValidasMap = datos.unidades_map;
-            
-            // 4. Rellenar <select> de Productos
-            productoSelect.innerHTML = '<option value="">-- Selecciona un producto --</option>';
-            datos.productos.forEach(prod => {
-                productoSelect.add(new Option(prod, prod));
+                <!-- Unidades Válidas -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-300 mb-2">Unidades Válidas <span class="text-red-400">*</span></label>
+                    <div id="unidades-container" class="space-y-2">
+                        <div class="flex gap-2">
+                            <input type="text" class="unidad-input flex-1 rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: litro">
+                            <button type="button" onclick="addUnidadInput()" class="px-3 py-1 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                                ➕
+                            </button>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-1">Añade las unidades de medida para este producto</p>
+                </div>
+
+                <!-- Botones -->
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModalProducto()" class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Guardar Producto
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="text/javascript">
+        // Variables globales
+        let datosIniciales = {};
+        let productosData = {};
+        let productoEditandoId = null;
+
+        // Inicialización cuando se carga la página
+        window.onload = function() {
+            console.log("Página cargada. Inicializando...");
+            cargarDatosIniciales();
+            cargarProductos();
+
+            // Inicializar nuevas funcionalidades
+            cargarProveedores();
+            cargarNotas();
+
+            // Establecer fecha actual por defecto
+            const hoy = new Date().toISOString().split('T')[0];
+            document.getElementById('fecha_compra-rapido').value = hoy;
+            document.getElementById('fecha_compra-completo').value = hoy;
+        };
+
+        // Función para cambiar entre pestañas
+        function showTab(tabName) {
+            // Ocultar todas las pestañas
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
             });
-            
-            // 5. Rellenar <select> de Proveedores
-            proveedorSelect.innerHTML = '<option value="">-- Opcional --</option>';
-            datos.proveedores.forEach(prov => {
-                proveedorSelect.add(new Option(prov, prov));
+
+            // Quitar active de todos los botones
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
             });
-        });
 
-        // --- Lógica de Unidades Condicionales ---
-        productoSelect.addEventListener('change', (event) => {
-            const productoElegido = event.target.value;
-            unidadSelect.innerHTML = ''; // Limpiar opciones
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName).classList.add('active');
 
-            if (productoElegido && unidadesValidasMap[productoElegido]) {
-                unidadSelect.disabled = false;
-                unidadSelect.add(new Option("-- Selecciona unidad --", ""));
-                
-                unidadesValidasMap[productoElegido].forEach(unidad => {
-                    unidadSelect.add(new Option(unidad, unidad));
-                });
-            } else {
-                unidadSelect.add(new Option("-- Elige producto --", ""));
-                unidadSelect.disabled = true;
-            }
-        });
+            // Activar el botón correspondiente
+            event.target.classList.add('active');
 
-        // --- Lógica de Guardar Compra ---
-        formCompra.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Evitar que el formulario se envíe de forma tradicional
-            
-            // 1. Recolectar datos del formulario
-            const formData = new FormData(formCompra);
-            const datos = Object.fromEntries(formData.entries());
-            
-            console.log("Enviando a Python:", datos);
-            
-            // 2. Enviar datos a Python usando Eel
-            const resultado = await eel.guardar_compra_validada(datos)();
-            
-            // 3. Mostrar feedback al usuario
-            if (resultado.success) {
-                mostrarFeedback("Compra guardada con éxito", "success");
-                formCompra.reset(); // Limpiar el formulario
-                // Resetear campos dinámicos
-                fechaCompraInput.value = new Date().toISOString().split('T')[0];
-                unidadSelect.innerHTML = '<option value="">-- Elige producto --</option>';
-                unidadSelect.disabled = true;
-                productoSelect.value = "";
-                proveedorSelect.value = "";
-            } else {
-                mostrarFeedback(`Error: ${resultado.error}`, "error");
+            // Cargar datos específicos si es necesario
+            if (tabName === 'productos') {
+                cargarProductos();
             }
-        });
-        
-        // --- Función de Feedback Visual ---
-        function mostrarFeedback(mensaje, tipo) {
-            feedbackEl.textContent = mensaje;
-            if (tipo === 'success') {
-                feedbackEl.className = 'text-sm text-green-400 opacity-100';
-            } else {
-                feedbackEl.className = 'text-sm text-red-400 opacity-100';
-            }
-            
-            // Ocultar el mensaje después de 3 segundos
-            setTimeout(() => {
-                feedbackEl.className = 'text-sm opacity-0';
-            }, 3000);
         }
 
-    </script> 
+        // Cargar datos iniciales (productos y proveedores)
+        async function cargarDatosIniciales() {
+            try {
+                datosIniciales = await eel.get_datos_iniciales()();
+                console.log("Datos iniciales cargados:", datosIniciales);
+
+                if (datosIniciales.error) {
+                    console.error("Error cargando datos iniciales:", datosIniciales.error);
+                    mostrarFeedback("Error cargando datos: " + datosIniciales.error, "error");
+                    return;
+                }
+
+                // Actualizar todos los selectores de productos
+                actualizarSelectoresProductos(datosIniciales.productos);
+
+                // Actualizar selectores de proveedores
+                actualizarSelectoresProveedores(datosIniciales.proveedores);
+
+                // Actualizar estadísticas
+                actualizarEstadisticas();
+
+            } catch (error) {
+                console.error("Error al cargar datos iniciales:", error);
+                mostrarFeedback("Error de conexión con el servidor", "error");
+            }
+        }
+
+        // Actualizar todos los selectores de productos
+        function actualizarSelectoresProductos(productos) {
+            const selectores = [
+                'producto-rapido',
+                'producto-completo'
+            ];
+
+            selectores.forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                if (select) {
+                    select.innerHTML = '<option value="">-- Selecciona un producto --</option>';
+                    productos.forEach(producto => {
+                        const option = new Option(producto, producto);
+                        select.add(option);
+                    });
+                }
+            });
+        }
+
+        // Actualizar selectores de proveedores
+        function actualizarSelectoresProveedores(proveedores) {
+            const selectores = [
+                'proveedor-rapido',
+                'proveedor-completo'
+            ];
+
+            selectores.forEach(selectorId => {
+                const select = document.getElementById(selectorId);
+                if (select) {
+                    select.innerHTML = '<option value="">-- Opcional --</option>';
+                    proveedores.forEach(proveedor => {
+                        const option = new Option(proveedor, proveedor);
+                        select.add(option);
+                    });
+                }
+            });
+        }
+
+        // Manejar cambio de producto para actualizar unidades
+        document.addEventListener('change', function(e) {
+            if (e.target.id && e.target.id.includes('producto')) {
+                const formId = e.target.id.split('-')[1] || 'rapido';
+                const productoSeleccionado = e.target.value;
+                const unidadSelect = document.getElementById(`unidad-${formId}`);
+
+                if (unidadSelect) {
+                    if (productoSeleccionado && datosIniciales.unidades_map && datosIniciales.unidades_map[productoSeleccionado]) {
+                        const unidades = datosIniciales.unidades_map[productoSeleccionado];
+                        unidadSelect.innerHTML = '<option value="">-- Selecciona unidad --</option>';
+                        unidades.forEach(unidad => {
+                            const option = new Option(unidad, unidad);
+                            unidadSelect.add(option);
+                        });
+                        unidadSelect.disabled = false;
+                    } else {
+                        unidadSelect.innerHTML = '<option value="">-- Elige producto --</option>';
+                        unidadSelect.disabled = true;
+                    }
+                }
+            }
+        });
+
+        // Manejar envío de formularios de compra
+        document.getElementById('form-compra-rapido').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await guardarCompra('rapido');
+        });
+
+        document.getElementById('form-compra-completo').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            await guardarCompra('completo');
+        });
+
+        // Función para guardar compra
+        async function guardarCompra(formType) {
+            const formData = new FormData(document.getElementById(`form-compra-${formType}`));
+            const datos = Object.fromEntries(formData.entries());
+
+            console.log("Datos de compra a guardar:", datos);
+
+            try {
+                const resultado = await eel.guardar_compra_validada(datos)();
+
+                if (resultado.success) {
+                    mostrarFeedback(`✅ Compra guardada con éxito (ID: ${resultado.compra_id})`, "success");
+                    document.getElementById(`form-compra-${formType}`).reset();
+
+                    // Restablecer fecha
+                    const hoy = new Date().toISOString().split('T')[0];
+                    document.getElementById(`fecha_compra-${formType}`).value = hoy;
+
+                    // Actualizar estadísticas
+                    actualizarEstadisticas();
+                } else {
+                    mostrarFeedback(`❌ Error: ${resultado.error}`, "error");
+                }
+
+            } catch (error) {
+                console.error("Error al guardar compra:", error);
+                mostrarFeedback("❌ Error de conexión con el servidor", "error");
+            }
+        }
+
+        // Función para mostrar feedback
+        function mostrarFeedback(mensaje, tipo) {
+            const feedbackElements = ['feedback', 'feedback-compras'];
+            feedbackElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = mensaje;
+                    element.className = `text-sm ${tipo === 'success' ? 'text-green-400' : 'text-red-400'}`;
+                    element.style.opacity = '1';
+
+                    setTimeout(() => {
+                        element.style.opacity = '0';
+                    }, 5000);
+                }
+            });
+        }
+
+        // Funciones para gestión de productos
+        async function cargarProductos() {
+            try {
+                const resultado = await eel.get_todos_los_productos()();
+
+                if (resultado.success) {
+                    productosData = resultado.productos;
+                    renderizarTablaProductos(productosData);
+                } else {
+                    console.error("Error cargando productos:", resultado.error);
+                }
+            } catch (error) {
+                console.error("Error al cargar productos:", error);
+            }
+        }
+
+        function renderizarTablaProductos(productos) {
+            const tbody = document.getElementById('tabla-productos');
+
+            if (!productos || productos.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-6 py-4 text-center text-gray-400">
+                            No hay productos registrados
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = productos.map(producto => `
+                <tr class="hover:bg-gray-700">
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${producto.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-100">${producto.nombre}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                        <span class="inline-flex flex-wrap gap-1">
+                            ${producto.unidades_validas.map(unidad =>
+                                `<span class="px-2 py-1 text-xs rounded-full bg-blue-900 text-blue-200">${unidad}</span>`
+                            ).join('')}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${producto.total_compras}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm">
+                        <button onclick="editarProducto(${producto.id})" class="text-blue-400 hover:text-blue-300 mr-3">
+                            ✏️ Editar
+                        </button>
+                        <button onclick="confirmarEliminarProducto(${producto.id}, '${producto.nombre}')" class="text-red-400 hover:text-red-300">
+                            🗑️ Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Funciones para el modal de producto
+        function openModalProducto(productoId = null) {
+            const modal = document.getElementById('modalProducto');
+            const title = document.getElementById('modalProductoTitle');
+            const form = document.getElementById('form-producto-modal');
+
+            productoEditandoId = productoId;
+
+            if (productoId) {
+                title.textContent = '✏️ Editar Producto';
+                // Cargar datos del producto
+                const producto = productosData.find(p => p.id === productoId);
+                if (producto) {
+                    document.getElementById('nombre-producto-modal').value = producto.nombre;
+
+                    // Limpiar y cargar unidades
+                    const container = document.getElementById('unidades-container');
+                    container.innerHTML = '';
+                    producto.unidades_validas.forEach((unidad, index) => {
+                        addUnidadInput(unidad);
+                    });
+                }
+            } else {
+                title.textContent = '📦 Añadir Nuevo Producto';
+                form.reset();
+
+                // Dejar solo un input de unidad vacío
+                const container = document.getElementById('unidades-container');
+                container.innerHTML = '';
+                addUnidadInput();
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeModalProducto() {
+            const modal = document.getElementById('modalProducto');
+            modal.classList.remove('show');
+            productoEditandoId = null;
+        }
+
+        function addUnidadInput(valor = '') {
+            const container = document.getElementById('unidades-container');
+            const inputGroup = document.createElement('div');
+            inputGroup.className = 'flex gap-2';
+            inputGroup.innerHTML = `
+                <input type="text" class="unidad-input flex-1 rounded-lg border-gray-600 bg-gray-700 text-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Ej: litro" value="${valor}">
+                <button type="button" onclick="this.parentElement.remove()" class="px-3 py-1 bg-red-600 text-white rounded-lg hover:bg-red-700">
+                    ❌
+                </button>
+            `;
+            container.appendChild(inputGroup);
+        }
+
+        // Manejar envío del formulario de producto
+        document.getElementById('form-producto-modal').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const nombre = document.getElementById('nombre-producto-modal').value.trim();
+            const unidadInputs = document.querySelectorAll('.unidad-input');
+            const unidades = Array.from(unidadInputs)
+                .map(input => input.value.trim())
+                .filter(unidad => unidad !== '');
+
+            if (unidades.length === 0) {
+                alert('Debes añadir al menos una unidad válida');
+                return;
+            }
+
+            try {
+                let resultado;
+                if (productoEditandoId) {
+                    resultado = await eel.actualizar_producto_existente(productoEditandoId, nombre, unidades)();
+                } else {
+                    resultado = await eel.crear_nuevo_producto(nombre, unidades)();
+                }
+
+                if (resultado.success) {
+                    mostrarFeedback(resultado.mensaje, "success");
+                    closeModalProducto();
+                    cargarProductos();
+                    cargarDatosIniciales(); // Actualizar selectores
+                } else {
+                    alert('Error: ' + resultado.error);
+                }
+
+            } catch (error) {
+                console.error("Error al guardar producto:", error);
+                alert("Error de conexión con el servidor");
+            }
+        });
+
+        function editarProducto(productoId) {
+            openModalProducto(productoId);
+        }
+
+        async function confirmarEliminarProducto(productoId, nombreProducto) {
+            if (confirm(`¿Estás seguro de que quieres eliminar el producto "${nombreProducto}"?\n\nEsta acción no se puede deshacer.`)) {
+                try {
+                    const resultado = await eel.eliminar_producto_por_id(productoId)();
+
+                    if (resultado.success) {
+                        mostrarFeedback(resultado.mensaje, "success");
+                        cargarProductos();
+                        cargarDatosIniciales(); // Actualizar selectores
+                    } else {
+                        alert('Error: ' + resultado.error);
+                    }
+
+                } catch (error) {
+                    console.error("Error al eliminar producto:", error);
+                    alert("Error de conexión con el servidor");
+                }
+            }
+        }
+
+        // Función para actualizar estadísticas
+        function actualizarEstadisticas() {
+            // Actualizar conteos
+            if (datosIniciales.productos) {
+                document.getElementById('total-productos').textContent = datosIniciales.productos.length;
+            }
+            if (datosIniciales.proveedores) {
+                document.getElementById('total-proveedores').textContent = datosIniciales.proveedores.length;
+            }
+
+            // TODO: Implementar carga dinámica de compras y alertas
+            document.getElementById('compras-hoy').textContent = '0';
+            document.getElementById('alertas-activas').textContent = '0';
+        }
+
+        // Cerrar modal con Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModalProducto();
+                cerrarModalProveedor();
+                cerrarModalNota();
+            }
+        });
+
+        // --- Funciones para Gestión de Proveedores ---
+
+        let proveedoresActuales = [];
+
+        async function cargarProveedores() {
+            try {
+                proveedoresActuales = await eel.get_todos_los_proveedores()();
+                mostrarProveedores();
+            } catch (error) {
+                console.error("Error al cargar proveedores:", error);
+            }
+        }
+
+        function mostrarProveedores() {
+            const tbody = document.getElementById('tablaProveedoresBody');
+            tbody.innerHTML = '';
+
+            if (proveedoresActuales.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" class="px-6 py-4 text-center text-gray-500">No hay proveedores registrados</td></tr>';
+                return;
+            }
+
+            proveedoresActuales.forEach(proveedor => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50';
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${proveedor.nombre}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${proveedor.contacto || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${proveedor.telefono || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${proveedor.email || '-'}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600">${proveedor.direccion ? proveedor.direccion.substring(0, 30) + '...' : '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">${proveedor.cif_nif || '-'}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${proveedor.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${proveedor.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button onclick="editarProveedor(${proveedor.id})" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
+                        <button onclick="confirmarEliminarProveedor(${proveedor.id}, '${proveedor.nombre}')" class="text-red-600 hover:text-red-900">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function abrirModalProveedor(proveedorId = null) {
+            const modal = document.getElementById('modalProveedor');
+            const titulo = document.getElementById('tituloModalProveedor');
+
+            if (proveedorId) {
+                const proveedor = proveedoresActuales.find(p => p.id === proveedorId);
+                if (proveedor) {
+                    titulo.textContent = 'Editar Proveedor';
+                    document.getElementById('proveedorId').value = proveedor.id;
+                    document.getElementById('proveedorNombre').value = proveedor.nombre;
+                    document.getElementById('proveedorContacto').value = proveedor.contacto || '';
+                    document.getElementById('proveedorTelefono').value = proveedor.telefono || '';
+                    document.getElementById('proveedorEmail').value = proveedor.email || '';
+                    document.getElementById('proveedorDireccion').value = proveedor.direccion || '';
+                    document.getElementById('proveedorCif').value = proveedor.cif_nif || '';
+                    document.getElementById('proveedorNotas').value = proveedor.notas_cliente || '';
+                }
+            } else {
+                titulo.textContent = 'Nuevo Proveedor';
+                document.getElementById('formProveedor').reset();
+                document.getElementById('proveedorId').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function cerrarModalProveedor() {
+            document.getElementById('modalProveedor').classList.add('hidden');
+            document.getElementById('formProveedor').reset();
+        }
+
+        async function guardarProveedor(event) {
+            event.preventDefault();
+
+            const proveedorId = document.getElementById('proveedorId').value;
+            const datos = {
+                nombre: document.getElementById('proveedorNombre').value.trim(),
+                contacto: document.getElementById('proveedorContacto').value.trim(),
+                telefono: document.getElementById('proveedorTelefono').value.trim(),
+                email: document.getElementById('proveedorEmail').value.trim(),
+                direccion: document.getElementById('proveedorDireccion').value.trim(),
+                cif_nif: document.getElementById('proveedorCif').value.trim(),
+                notas_cliente: document.getElementById('proveedorNotas').value.trim(),
+                activo: true
+            };
+
+            try {
+                let resultado;
+                if (proveedorId) {
+                    resultado = await eel.actualizar_proveedor_existente(parseInt(proveedorId), datos)();
+                } else {
+                    resultado = await eel.crear_nuevo_proveedor(datos)();
+                }
+
+                if (resultado.success) {
+                    cerrarModalProveedor();
+                    cargarProveedores();
+                    cargarDatosIniciales(); // Actualizar selectores del formulario de compras
+                    mostrarFeedback(resultado.mensaje, "success");
+                } else {
+                    alert('Error: ' + resultado.error);
+                }
+
+            } catch (error) {
+                console.error("Error al guardar proveedor:", error);
+                alert("Error de conexión con el servidor");
+            }
+        }
+
+        function editarProveedor(proveedorId) {
+            abrirModalProveedor(proveedorId);
+        }
+
+        async function confirmarEliminarProveedor(proveedorId, nombreProveedor) {
+            if (confirm(`¿Estás seguro de que quieres eliminar el proveedor "${nombreProveedor}"?\n\nEsta acción no se puede deshacer.`)) {
+                try {
+                    const resultado = await eel.eliminar_proveedor_por_id(proveedorId)();
+
+                    if (resultado.success) {
+                        mostrarFeedback(resultado.mensaje, "success");
+                        cargarProveedores();
+                        cargarDatosIniciales(); // Actualizar selectores
+                    } else {
+                        alert('Error: ' + resultado.error);
+                    }
+
+                } catch (error) {
+                    console.error("Error al eliminar proveedor:", error);
+                    alert("Error de conexión con el servidor");
+                }
+            }
+        }
+
+        // --- Funciones para Sistema de Notas ---
+
+        let notasActuales = [];
+
+        async function cargarNotas() {
+            try {
+                const filtros = obtenerFiltrosNotas();
+                notasActuales = await eel.get_todas_las_notas(filtros)();
+                mostrarNotas();
+                await actualizarSelectoresNotas();
+            } catch (error) {
+                console.error("Error al cargar notas:", error);
+            }
+        }
+
+        function obtenerFiltrosNotas() {
+            const categoria = document.getElementById('filtroCategoria').value;
+            const prioridad = document.getElementById('filtroPrioridad').value;
+            const estado = document.getElementById('filtroEstado').value;
+            const busqueda = document.getElementById('busquedaNota').value.toLowerCase();
+
+            const filtros = {};
+            if (categoria) filtros.categoria = categoria;
+            if (prioridad) filtros.prioridad = prioridad;
+            if (estado) filtros.estado = estado;
+            if (busqueda) filtros.busqueda = busqueda;
+
+            return Object.keys(filtros).length > 0 ? filtros : null;
+        }
+
+        function mostrarNotas() {
+            const contenedor = document.getElementById('contenedorNotas');
+            contenedor.innerHTML = '';
+
+            if (notasActuales.length === 0) {
+                contenedor.innerHTML = `
+                    <div class="text-center py-12">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="mt-2 text-sm font-medium text-gray-900">No hay notas</h3>
+                        <p class="mt-1 text-sm text-gray-500">Comienza creando tu primera nota.</p>
+                        <div class="mt-6">
+                            <button onclick="abrirModalNota()" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
+                                <svg class="mr-2 -ml-1 w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                Crear Nota
+                            </button>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4';
+
+            notasActuales.forEach(nota => {
+                const card = crearCardNota(nota);
+                grid.appendChild(card);
+            });
+
+            contenedor.appendChild(grid);
+        }
+
+        function crearCardNota(nota) {
+            const card = document.createElement('div');
+            card.className = 'bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow';
+
+            const prioridadColor = {
+                'baja': 'bg-gray-100 text-gray-800',
+                'media': 'bg-yellow-100 text-yellow-800',
+                'alta': 'bg-red-100 text-red-800'
+            }[nota.prioridad] || 'bg-gray-100 text-gray-800';
+
+            const estadoColor = {
+                'activa': 'bg-green-100 text-green-800',
+                'en_progreso': 'bg-blue-100 text-blue-800',
+                'resuelta': 'bg-purple-100 text-purple-800',
+                'cerrada': 'bg-gray-100 text-gray-800'
+            }[nota.estado] || 'bg-gray-100 text-gray-800';
+
+            card.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <h3 class="text-lg font-medium text-gray-900 flex-1 mr-2">${nota.titulo}</h3>
+                    <div class="flex space-x-1">
+                        <span class="px-2 py-1 text-xs font-medium rounded ${prioridadColor}">${nota.prioridad}</span>
+                        <span class="px-2 py-1 text-xs font-medium rounded ${estadoColor}">${nota.estado.replace('_', ' ')}</span>
+                    </div>
+                </div>
+                <p class="text-sm text-gray-600 mb-2">${nota.categoria}</p>
+                <p class="text-sm text-gray-800 line-clamp-3 mb-3">${nota.contenido}</p>
+                <div class="flex justify-between items-center text-xs text-gray-500 mb-3">
+                    <span>${new Date(nota.fecha_creacion).toLocaleDateString('es-ES')}</span>
+                    <span>por ${nota.usuario_creador}</span>
+                </div>
+                <div class="flex justify-end space-x-2">
+                    <button onclick="editarNota(${nota.id})" class="text-blue-600 hover:text-blue-800 text-sm">Editar</button>
+                    <button onclick="confirmarEliminarNota(${nota.id}, '${nota.titulo}')" class="text-red-600 hover:text-red-800 text-sm">Eliminar</button>
+                </div>
+            `;
+
+            return card;
+        }
+
+        function abrirModalNota(notaId = null) {
+            const modal = document.getElementById('modalNota');
+            const titulo = document.getElementById('tituloModalNota');
+
+            if (notaId) {
+                const nota = notasActuales.find(n => n.id === notaId);
+                if (nota) {
+                    titulo.textContent = 'Editar Nota';
+                    document.getElementById('notaId').value = nota.id;
+                    document.getElementById('notaTitulo').value = nota.titulo;
+                    document.getElementById('notaCategoria').value = nota.categoria;
+                    document.getElementById('notaPrioridad').value = nota.prioridad;
+                    document.getElementById('notaEstado').value = nota.estado;
+                    document.getElementById('notaContenido').value = nota.contenido;
+                    document.getElementById('notaProducto').value = nota.producto_relacionado || '';
+                    document.getElementById('notaProveedor').value = nota.proveedor_relacionado || '';
+                    document.getElementById('notaEtiquetas').value = nota.etiquetas || '';
+                }
+            } else {
+                titulo.textContent = 'Nueva Nota';
+                document.getElementById('formNota').reset();
+                document.getElementById('notaId').value = '';
+            }
+
+            modal.classList.remove('hidden');
+        }
+
+        function cerrarModalNota() {
+            document.getElementById('modalNota').classList.add('hidden');
+            document.getElementById('formNota').reset();
+        }
+
+        async function guardarNota(event) {
+            event.preventDefault();
+
+            const notaId = document.getElementById('notaId').value;
+            const datos = {
+                titulo: document.getElementById('notaTitulo').value.trim(),
+                categoria: document.getElementById('notaCategoria').value,
+                prioridad: document.getElementById('notaPrioridad').value,
+                estado: document.getElementById('notaEstado').value,
+                contenido: document.getElementById('notaContenido').value.trim(),
+                producto_relacionado: document.getElementById('notaProducto').value ? parseInt(document.getElementById('notaProducto').value) : null,
+                proveedor_relacionado: document.getElementById('notaProveedor').value ? parseInt(document.getElementById('notaProveedor').value) : null,
+                etiquetas: document.getElementById('notaEtiquetas').value.trim(),
+                usuario_creador: 'cliente'
+            };
+
+            try {
+                let resultado;
+                if (notaId) {
+                    resultado = await eel.actualizar_nota_existente(parseInt(notaId), datos)();
+                } else {
+                    resultado = await eel.crear_nueva_nota(datos)();
+                }
+
+                if (resultado.success) {
+                    cerrarModalNota();
+                    cargarNotas();
+                    mostrarFeedback(resultado.mensaje, "success");
+                } else {
+                    alert('Error: ' + resultado.error);
+                }
+
+            } catch (error) {
+                console.error("Error al guardar nota:", error);
+                alert("Error de conexión con el servidor");
+            }
+        }
+
+        function editarNota(notaId) {
+            abrirModalNota(notaId);
+        }
+
+        async function confirmarEliminarNota(notaId, tituloNota) {
+            if (confirm(`¿Estás seguro de que quieres eliminar la nota "${tituloNota}"?\n\nEsta acción no se puede deshacer.`)) {
+                try {
+                    const resultado = await eel.eliminar_nota_por_id(notaId)();
+
+                    if (resultado.success) {
+                        mostrarFeedback(resultado.mensaje, "success");
+                        cargarNotas();
+                    } else {
+                        alert('Error: ' + resultado.error);
+                    }
+
+                } catch (error) {
+                    console.error("Error al eliminar nota:", error);
+                    alert("Error de conexión con el servidor");
+                }
+            }
+        }
+
+        async function actualizarSelectoresNotas() {
+            try {
+                // Actualizar selector de productos
+                const productos = await eel.get_todos_los_productos()();
+                const selectorProductos = document.getElementById('notaProducto');
+                selectorProductos.innerHTML = '<option value="">Ninguno</option>';
+
+                if (productos && productos.length > 0) {
+                    productos.forEach(producto => {
+                        const option = document.createElement('option');
+                        option.value = producto.id;
+                        option.textContent = producto.nombre;
+                        selectorProductos.appendChild(option);
+                    });
+                }
+
+                // Actualizar selector de proveedores
+                const selectorProveedores = document.getElementById('notaProveedor');
+                selectorProveedores.innerHTML = '<option value="">Ninguno</option>';
+
+                if (proveedoresActuales && proveedoresActuales.length > 0) {
+                    proveedoresActuales.forEach(proveedor => {
+                        const option = document.createElement('option');
+                        option.value = proveedor.id;
+                        option.textContent = proveedor.nombre;
+                        selectorProveedores.appendChild(option);
+                    });
+                }
+
+            } catch (error) {
+                console.error("Error al actualizar selectores de notas:", error);
+            }
+        }
+
+    </script>
+
+    <!-- Modal Proveedor -->
+    <div id="modalProveedor" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="tituloModalProveedor" class="text-lg font-semibold text-gray-800"></h3>
+                <button type="button" onclick="cerrarModalProveedor()" class="text-gray-400 hover:text-gray-600" aria-label="Cerrar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="formProveedor" onsubmit="guardarProveedor(event)">
+                <input type="hidden" id="proveedorId">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nombre del Proveedor</label>
+                    <input type="text" id="proveedorNombre" required
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contacto</label>
+                    <input type="text" id="proveedorContacto"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Teléfono</label>
+                    <input type="tel" id="proveedorTelefono"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="proveedorEmail"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
+                    <textarea id="proveedorDireccion" rows="2"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">CIF/NIF</label>
+                    <input type="text" id="proveedorCif"
+                           class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notas del Cliente</label>
+                    <textarea id="proveedorNotas" rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="cerrarModalProveedor()"
+                            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Nota -->
+    <div id="modalNota" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="tituloModalNota" class="text-lg font-semibold text-gray-800"></h3>
+                <button type="button" onclick="cerrarModalNota()" class="text-gray-400 hover:text-gray-600" aria-label="Cerrar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="formNota" onsubmit="guardarNota(event)">
+                <input type="hidden" id="notaId">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Título</label>
+                        <input type="text" id="notaTitulo" required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                        <select id="notaCategoria" required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Seleccionar categoría</option>
+                            <option value="💡 Ideas de Funcionalidad">💡 Ideas de Funcionalidad</option>
+                            <option value="🐛 Reporte de Problemas">🐛 Reporte de Problemas</option>
+                            <option value="🎨 Mejoras de Interfaz">🎨 Mejoras de Interfaz</option>
+                            <option value="📊 Sugerencias de Análisis">📊 Sugerencias de Análisis</option>
+                            <option value="📋 Notas de Negocio">📋 Notas de Negocio</option>
+                            <option value="🔧 Problemas Técnicos">🔧 Problemas Técnicos</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Prioridad</label>
+                        <select id="notaPrioridad"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="baja">Baja</option>
+                            <option value="media" selected>Media</option>
+                            <option value="alta">Alta</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Estado</label>
+                        <select id="notaEstado"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="activa" selected>Activa</option>
+                            <option value="en_progreso">En Progreso</option>
+                            <option value="resuelta">Resuelta</option>
+                            <option value="cerrada">Cerrada</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Contenido</label>
+                    <textarea id="notaContenido" rows="6" required
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              placeholder="Describe detalladamente tu nota o sugerencia..."></textarea>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Producto Relacionado</label>
+                        <select id="notaProducto"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Ninguno</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Proveedor Relacionado</label>
+                        <select id="notaProveedor"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Ninguno</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Etiquetas</label>
+                        <input type="text" id="notaEtiquetas"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="mejora, urgente, interfaz">
+                    </div>
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="cerrarModalNota()"
+                            class="px-4 py-2 text-gray-600 border border-gray-300 rounded-md hover:bg-gray-50">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        Guardar Nota
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 </body>
 </html>
