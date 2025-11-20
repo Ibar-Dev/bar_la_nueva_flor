@@ -1,0 +1,68 @@
+═══════════════════════════════════════════════════════════════
+               🚀 BarStockManager - Guía de Instalación
+═══════════════════════════════════════════════════════════════
+
+📋 PASOS PARA INSTALAR EN EL PORTÁTIL:
+
+1️⃣  Copia toda esta carpeta "para_pendrive" al escritorio o
+    a una carpeta de tu elección en el portátil
+
+2️⃣  Ve a la carpeta donde copiaste los archivos
+
+3️⃣  Haz doble clic en "BarStockManager.exe"
+
+4️⃣  ¡Listo! La aplicación está lista para usar
+
+═══════════════════════════════════════════════════════════════
+
+🎯 CARACTERÍSTICAS INCLUIDAS:
+
+✅ Blog de Notas
+   - Añadir/editar/eliminar notas
+   - Categorías: Ideas, Problemas, Mejoras, etc.
+   - Prioridades: Baja, Media, Alta, Urgente
+   - Búsqueda y filtros avanzados
+
+✅ Gestión de Productos
+   - Alta, edición y eliminación de productos
+   - Sistema de unidades (kg, litros, unidades, etc.)
+   - Validación automática de datos
+
+✅ Gestión de Proveedores
+   - Información completa de contacto
+   - Teléfono, email, dirección, CIF/NIF
+   - Sistema de notas por proveedor
+
+✅ 🎁 Sistema de Descuentos Personalizable (NUEVO)
+   - Crear tipos de descuento personalizados
+   - Configurar porcentajes y montos mínimos
+   - Activar/desactivar descuentos
+
+✅ Registro de Compras
+   - Validación automática de datos
+   - Asociación con productos y proveedores
+   - Aplicación de descuentos
+
+✅ Análisis y Reportes
+   - Alertas automáticas de stock bajo
+   - Backup automático de datos
+   - Exportación de información
+
+═══════════════════════════════════════════════════════════════
+
+⚠️ REQUISITOS MÍNIMOS:
+• Windows 10 o superior
+• No requiere instalación adicional
+• No necesita conexión a internet
+
+═══════════════════════════════════════════════════════════════
+
+🔧 SOPORTE TÉCNICO:
+• Los datos se guardan automáticamente en el archivo "stock.db"
+• Se crean carpetas "logs", "backups" y "exports" automáticamente
+• Si tienes problemas, reinicia la aplicación
+
+📅 Versión: 2.0 - Con sistema de descuentos personalizable
+🕒 Actualización: 20 de noviembre de 2025
+
+═══════════════════════════════════════════════════════════════

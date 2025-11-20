@@ -1,2 +1,0 @@
-eel
-# Nota: sqlite3 viene incluido con Python estándar, no agregar aquí.
