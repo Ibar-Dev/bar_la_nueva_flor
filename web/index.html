@@ -84,6 +84,9 @@
                 <button onclick="showTab('notas')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
                     📝 Notas
                 </button>
+                <button onclick="showTab('descuentos')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
+                    🎁 Descuentos
+                </button>
                 <button onclick="showTab('analytics')" class="tab-button py-2 px-4 text-sm font-medium text-gray-300 hover:text-white border-b-2 border-transparent hover:border-gray-300">
                     📈 Análisis
                 </button>
@@ -443,6 +446,42 @@
             </div>
         </div>
 
+        <!-- Pestaña: Descuentos -->
+        <div id="descuentos" class="tab-content">
+            <!-- Cabecera con botón de añadir -->
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-semibold">🎁 Gestión de Descuentos</h2>
+                <button type="button" onclick="openModalDescuento()" class="inline-flex justify-center rounded-lg border border-transparent bg-green-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                    ➕ Nuevo Descuento
+                </button>
+            </div>
+
+            <!-- Tabla de Descuentos -->
+            <div class="bg-gray-800 rounded-2xl shadow-lg border border-gray-700 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Nombre</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Porcentaje</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Monto Mínimo</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Descripción</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-descuentos" class="bg-gray-800 divide-y divide-gray-700">
+                            <tr>
+                                <td colspan="6" class="px-6 py-4 text-center text-gray-400">
+                                    Cargando descuentos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <!-- Pestaña: Análisis -->
         <div id="analytics" class="tab-content">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
@@ -557,6 +596,8 @@
             // Cargar datos específicos si es necesario
             if (tabName === 'productos') {
                 cargarProductos();
+            } else if (tabName === 'descuentos') {
+                cargarDescuentos();
             }
         }
 
@@ -1273,6 +1314,169 @@
             }
         }
 
+        // Funciones para gestión de descuentos
+        let descuentosActuales = [];
+
+        async function cargarDescuentos() {
+            try {
+                const resultado = await eel.get_todos_los_descuentos()();
+                if (resultado.success) {
+                    descuentosActuales = resultado.descuentos;
+                    renderizarTablaDescuentos();
+                } else {
+                    console.error('Error al cargar descuentos:', resultado.error);
+                }
+            } catch (error) {
+                console.error('Error en la comunicación:', error);
+            }
+        }
+
+        function renderizarTablaDescuentos() {
+            const tbody = document.getElementById('tabla-descuentos');
+
+            if (descuentosActuales.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-4 text-center text-gray-400">
+                            No hay descuentos configurados. Haz clic en "Nuevo Descuento" para crear uno.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tbody.innerHTML = descuentosActuales.map(descuento => `
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm font-medium text-gray-900">${descuento.nombre}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">${descuento.porcentaje}%</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">
+                            ${descuento.condicion_monto_minimo > 0 ? `$${descuento.condicion_monto_minimo.toFixed(2)}` : 'Sin mínimo'}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4">
+                        <div class="text-sm text-gray-900 max-w-xs truncate" title="${descuento.descripcion || ''}">
+                            ${descuento.descripcion || 'Sin descripción'}
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full ${descuento.activo === 'Sí' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">
+                            ${descuento.activo}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        <button onclick="openModalDescuento(${descuento.id})" class="text-blue-600 hover:text-blue-900">
+                            Editar
+                        </button>
+                        <button onclick="eliminarDescuento(${descuento.id})" class="text-red-600 hover:text-red-900">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openModalDescuento(descuentoId = null) {
+            const modal = document.getElementById('modalDescuento');
+            const title = document.getElementById('modalDescuentoTitle');
+            const form = document.getElementById('form-descuento');
+
+            // Limpiar formulario
+            form.reset();
+            document.getElementById('descuento-id').value = '';
+
+            if (descuentoId) {
+                const descuento = descuentosActuales.find(d => d.id === descuentoId);
+                if (descuento) {
+                    title.textContent = '✏️ Editar Descuento';
+                    document.getElementById('descuento-id').value = descuento.id;
+                    document.getElementById('descuento-nombre').value = descuento.nombre;
+                    document.getElementById('descuento-porcentaje').value = descuento.porcentaje;
+                    document.getElementById('descuento-monto-minimo').value = descuento.condicion_monto_minimo;
+                    document.getElementById('descuento-descripcion').value = descuento.descripcion || '';
+                    document.getElementById('descuento-activo').checked = descuento.activo === 'Sí';
+                }
+            } else {
+                title.textContent = '🎁 Añadir Nuevo Descuento';
+            }
+
+            modal.classList.add('show');
+        }
+
+        function closeModalDescuento() {
+            const modal = document.getElementById('modalDescuento');
+            modal.classList.remove('show');
+            document.getElementById('form-descuento').reset();
+        }
+
+        async function guardarDescuento(event) {
+            event.preventDefault();
+
+            const descuentoId = document.getElementById('descuento-id').value;
+            const datos = {
+                nombre: document.getElementById('descuento-nombre').value.trim(),
+                porcentaje: parseFloat(document.getElementById('descuento-porcentaje').value),
+                condicion_monto_minimo: parseFloat(document.getElementById('descuento-monto-minimo').value) || 0.0,
+                descripcion: document.getElementById('descuento-descripcion').value.trim(),
+                activo: document.getElementById('descuento-activo').checked
+            };
+
+            try {
+                let resultado;
+                if (descuentoId) {
+                    resultado = await eel.actualizar_tipo_descuento_existente(
+                        parseInt(descuentoId),
+                        datos.nombre,
+                        datos.porcentaje,
+                        datos.condicion_monto_minimo,
+                        datos.descripcion,
+                        datos.activo
+                    )();
+                } else {
+                    resultado = await eel.crear_nuevo_tipo_descuento(
+                        datos.nombre,
+                        datos.porcentaje,
+                        datos.condicion_monto_minimo,
+                        datos.descripcion
+                    )();
+                }
+
+                if (resultado.success) {
+                    closeModalDescuento();
+                    cargarDescuentos();
+                    mostrarFeedback('Descuento guardado exitosamente', 'success');
+                } else {
+                    mostrarFeedback(resultado.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error al guardar descuento:', error);
+                mostrarFeedback('Error al comunicarse con el servidor', 'error');
+            }
+        }
+
+        async function eliminarDescuento(descuentoId) {
+            if (!confirm('¿Estás seguro de que deseas eliminar este descuento?')) {
+                return;
+            }
+
+            try {
+                const resultado = await eel.eliminar_tipo_descuento_por_id(descuentoId)();
+                if (resultado.success) {
+                    cargarDescuentos();
+                    mostrarFeedback('Descuento eliminado exitosamente', 'success');
+                } else {
+                    mostrarFeedback(resultado.error, 'error');
+                }
+            } catch (error) {
+                console.error('Error al eliminar descuento:', error);
+                mostrarFeedback('Error al comunicarse con el servidor', 'error');
+            }
+        }
+
     </script>
 
     <!-- Modal Proveedor -->
@@ -1331,6 +1535,64 @@
                     <button type="submit"
                             class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
                         Guardar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Descuento -->
+    <div id="modalDescuento" class="modal">
+        <div class="bg-gray-800 rounded-2xl p-6 w-full max-w-md mx-4">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold" id="modalDescuentoTitle">🎁 Añadir Nuevo Descuento</h3>
+                <button onclick="closeModalDescuento()" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-descuento" onsubmit="guardarDescuento(event)">
+                <input type="hidden" id="descuento-id">
+                <div class="space-y-4">
+                    <div>
+                        <label for="descuento-nombre" class="block text-sm font-medium text-gray-300">Nombre del Descuento *</label>
+                        <input type="text" id="descuento-nombre" required
+                               class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                               placeholder="Ej: Descuento de temporada">
+                    </div>
+                    <div>
+                        <label for="descuento-porcentaje" class="block text-sm font-medium text-gray-300">Porcentaje (%) *</label>
+                        <input type="number" id="descuento-porcentaje" required min="0" max="100" step="0.1"
+                               class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                               placeholder="Ej: 15">
+                    </div>
+                    <div>
+                        <label for="descuento-monto-minimo" class="block text-sm font-medium text-gray-300">Monto Mínimo de Compra</label>
+                        <input type="number" id="descuento-monto-minimo" min="0" step="0.01"
+                               class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                               placeholder="Ej: 100.00">
+                    </div>
+                    <div>
+                        <label for="descuento-descripcion" class="block text-sm font-medium text-gray-300">Descripción</label>
+                        <textarea id="descuento-descripcion" rows="3"
+                                  class="mt-1 block w-full rounded-lg border-gray-600 bg-gray-700 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
+                                  placeholder="Descripción del descuento..."></textarea>
+                    </div>
+                    <div class="flex items-center">
+                        <input type="checkbox" id="descuento-activo" checked
+                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-600 rounded bg-gray-700">
+                        <label for="descuento-activo" class="ml-2 block text-sm text-gray-300">Descuento Activo</label>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button type="button" onclick="closeModalDescuento()"
+                            class="px-4 py-2 border border-gray-600 text-gray-300 rounded-lg hover:bg-gray-700">
+                        Cancelar
+                    </button>
+                    <button type="submit"
+                            class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Guardar Descuento
                     </button>
                 </div>
             </form>

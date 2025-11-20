@@ -4,16 +4,14 @@
 
 📋 PASOS PARA INSTALAR EN EL PORTÁTIL:
 
-OPCIÓN A: Si tienes Python instalado (Recomendado):
-1️⃣  Copia toda esta carpeta "para_pendrive" al escritorio
-2️⃣  Ve a la carpeta donde copiaste los archivos
-3️⃣  Haz doble clic en "EJECUTAR_CON_PYTHON.bat"
-4️⃣  ¡Listo! La aplicación está lista para usar
+1️⃣  Copia toda esta carpeta "para_pendrive" al escritorio o
+    a una carpeta de tu elección en el portátil
 
-OPCIÓN B: Intentar con el ejecutable:
-1️⃣  Copia toda esta carpeta "para_pendrive" al escritorio
-2️⃣  Haz doble clic en "BarStockManager.exe"
-3️⃣  Si no funciona, usa la OPCIÓN A
+2️⃣  Ve a la carpeta donde copiaste los archivos
+
+3️⃣  Haz doble clic en "INICIAR_APLICACIÓN.bat"
+
+4️⃣  ¡Listo! La aplicación está lista para usar
 
 ═══════════════════════════════════════════════════════════════
 
@@ -24,6 +22,7 @@ OPCIÓN B: Intentar con el ejecutable:
    - Categorías: Ideas, Problemas, Mejoras, etc.
    - Prioridades: Baja, Media, Alta, Urgente
    - Búsqueda y filtros avanzados
+   - Estados: Activa, En Progreso, Resuelta, Cancelada
 
 ✅ Gestión de Productos
    - Alta, edición y eliminación de productos
@@ -35,10 +34,16 @@ OPCIÓN B: Intentar con el ejecutable:
    - Teléfono, email, dirección, CIF/NIF
    - Sistema de notas por proveedor
 
+✅ 🎁 Sistema de Descuentos Personalizable (NUEVO)
+   - Crear tipos de descuento personalizados
+   - Configurar porcentajes y montos mínimos
+   - Activar/desactivar descuentos
+   - 5 descuentos predefinidos incluidos
+
 ✅ Registro de Compras
    - Validación automática de datos
    - Asociación con productos y proveedores
-   - Registro de descuentos
+   - Aplicación de descuentos
 
 ✅ Análisis y Reportes
    - Alertas automáticas de stock bajo
@@ -49,8 +54,8 @@ OPCIÓN B: Intentar con el ejecutable:
 
 ⚠️ REQUISITOS MÍNIMOS:
 • Windows 10 o superior
-• No requiere instalación adicional
-• No necesita conexión a internet
+• Python 3.8 o superior (generalmente ya instalado)
+• No requiere conexión a internet
 
 ═══════════════════════════════════════════════════════════════
 
@@ -59,7 +64,7 @@ OPCIÓN B: Intentar con el ejecutable:
 • Se crean carpetas "logs", "backups" y "exports" automáticamente
 • Si tienes problemas, reinicia la aplicación
 
-📅 Versión: 1.5 - Versión Estable Probada
+📅 Versión: 2.0 - Con sistema de descuentos personalizable
 🕒 Actualización: 20 de noviembre de 2025
 
 ═══════════════════════════════════════════════════════════════
