@@ -957,3 +957,196 @@ def verificar_conexion() -> bool:
         conn.close()
         return True
     return False
+
+# --- Funciones para Gestión de Tipos de Descuento ---
+
+def obtener_todos_los_descuentos() -> Dict:
+    """Obtiene todos los tipos de descuento disponibles."""
+    conn = connect_db()
+    if not conn:
+        return {"success": False, "error": "No se pudo conectar a la BD"}
+
+    cursor = conn.cursor()
+
+    try:
+        # Verificar si la tabla TiposDescuento existe
+        cursor.execute("""
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='TiposDescuento'
+        """)
+
+        if not cursor.fetchone():
+            # Crear la tabla si no existe
+            cursor.execute("""
+            CREATE TABLE TiposDescuento (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                nombre TEXT NOT NULL UNIQUE,
+                porcentaje REAL NOT NULL CHECK (porcentaje >= 0 AND porcentaje <= 100),
+                condicion_monto_minimo REAL DEFAULT 0,
+                descripcion TEXT,
+                activo INTEGER DEFAULT 1,
+                fecha_creacion TEXT DEFAULT CURRENT_TIMESTAMP,
+                fecha_modificacion TEXT DEFAULT CURRENT_TIMESTAMP
+            )
+            """)
+
+            # Insertar descuentos por defecto
+            descuentos_defecto = [
+                ("Descuento de fidelización", 15.0, 100.0, "15% de descuento en compras mayores a $100"),
+                ("Descuento por volumen", 10.0, 50.0, "10% de descuento en compras mayores a $50"),
+                ("Descuento de temporada", 20.0, 200.0, "20% de descuento en compras mayores a $200"),
+                ("Descuento de proveedor preferido", 5.0, 0.0, "5% de descuento para proveedores preferidos"),
+                ("Descuento especial", 25.0, 500.0, "25% de descuento en compras mayores a $500")
+            ]
+
+            for nombre, porcentaje, monto_min, descripcion in descuentos_defecto:
+                cursor.execute("""
+                INSERT INTO TiposDescuento (nombre, porcentaje, condicion_monto_minimo, descripcion)
+                VALUES (?, ?, ?, ?)
+                """, (nombre, porcentaje, monto_min, descripcion))
+
+        cursor.execute("""
+        SELECT id, nombre, porcentaje, condicion_monto_minimo, descripcion,
+               CASE WHEN activo = 1 THEN 'Sí' ELSE 'No' END as activo,
+               fecha_creacion, fecha_modificacion
+        FROM TiposDescuento
+        ORDER BY porcentaje DESC
+        """)
+
+        descuentos = []
+        for row in cursor.fetchall():
+            descuentos.append({
+                'id': row['id'],
+                'nombre': row['nombre'],
+                'porcentaje': row['porcentaje'],
+                'condicion_monto_minimo': row['condicion_monto_minimo'],
+                'descripcion': row['descripcion'],
+                'activo': row['activo'],
+                'fecha_creacion': row['fecha_creacion'],
+                'fecha_modificacion': row['fecha_modificacion']
+            })
+
+        logger.info(f"Obtenidos {len(descuentos)} tipos de descuento")
+        return {"success": True, "descuentos": descuentos}
+
+    except sqlite3.Error as e:
+        logger.error(f"Error al obtener descuentos: {e}")
+        return {"success": False, "error": str(e)}
+    finally:
+        conn.close()
+
+def crear_tipo_descuento(nombre: str, porcentaje: float, condicion_monto_minimo: float = 0.0, descripcion: str = "") -> Dict:
+    """Crea un nuevo tipo de descuento."""
+    conn = connect_db()
+    if not conn:
+        return {"success": False, "error": "No se pudo conectar a la BD"}
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        INSERT INTO TiposDescuento (nombre, porcentaje, condicion_monto_minimo, descripcion)
+        VALUES (?, ?, ?, ?)
+        """, (nombre, porcentaje, condicion_monto_minimo, descripcion))
+
+        conn.commit()
+        descuento_id = cursor.lastrowid
+
+        logger.info(f"Tipo de descuento creado exitosamente: {nombre} (ID: {descuento_id})")
+        return {"success": True, "descuento_id": descuento_id, "message": "Tipo de descuento creado exitosamente"}
+
+    except sqlite3.IntegrityError:
+        return {"success": False, "error": f"Ya existe un tipo de descuento con el nombre '{nombre}'"}
+    except sqlite3.Error as e:
+        logger.error(f"Error al crear tipo de descuento: {e}")
+        return {"success": False, "error": str(e)}
+    finally:
+        conn.close()
+
+def actualizar_tipo_descuento(descuento_id: int, nombre: str, porcentaje: float, condicion_monto_minimo: float = 0.0, descripcion: str = "", activo: bool = True) -> Dict:
+    """Actualiza un tipo de descuento existente."""
+    conn = connect_db()
+    if not conn:
+        return {"success": False, "error": "No se pudo conectar a la BD"}
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        UPDATE TiposDescuento
+        SET nombre = ?, porcentaje = ?, condicion_monto_minimo = ?, descripcion = ?,
+            activo = ?, fecha_modificacion = CURRENT_TIMESTAMP
+        WHERE id = ?
+        """, (nombre, porcentaje, condicion_monto_minimo, descripcion, int(activo), descuento_id))
+
+        if cursor.rowcount == 0:
+            return {"success": False, "error": "Tipo de descuento no encontrado"}
+
+        conn.commit()
+        logger.info(f"Tipo de descuento actualizado exitosamente: ID {descuento_id}")
+        return {"success": True, "message": "Tipo de descuento actualizado exitosamente"}
+
+    except sqlite3.IntegrityError:
+        return {"success": False, "error": f"Ya existe otro tipo de descuento con el nombre '{nombre}'"}
+    except sqlite3.Error as e:
+        logger.error(f"Error al actualizar tipo de descuento: {e}")
+        return {"success": False, "error": str(e)}
+    finally:
+        conn.close()
+
+def eliminar_tipo_descuento(descuento_id: int) -> Dict:
+    """Elimina un tipo de descuento."""
+    conn = connect_db()
+    if not conn:
+        return {"success": False, "error": "No se pudo conectar a la BD"}
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("DELETE FROM TiposDescuento WHERE id = ?", (descuento_id,))
+
+        if cursor.rowcount == 0:
+            return {"success": False, "error": "Tipo de descuento no encontrado"}
+
+        conn.commit()
+        logger.info(f"Tipo de descuento eliminado exitosamente: ID {descuento_id}")
+        return {"success": True, "message": "Tipo de descuento eliminado exitosamente"}
+
+    except sqlite3.Error as e:
+        logger.error(f"Error al eliminar tipo de descuento: {e}")
+        return {"success": False, "error": str(e)}
+    finally:
+        conn.close()
+
+def obtener_descuentos_activos() -> Dict:
+    """Obtiene solo los descuentos activos para mostrar en el formulario de compras."""
+    conn = connect_db()
+    if not conn:
+        return {"success": False, "error": "No se pudo conectar a la BD"}
+
+    cursor = conn.cursor()
+
+    try:
+        cursor.execute("""
+        SELECT nombre, porcentaje, condicion_monto_minimo, descripcion
+        FROM TiposDescuento
+        WHERE activo = 1
+        ORDER BY porcentaje DESC
+        """)
+
+        descuentos = []
+        for row in cursor.fetchall():
+            descuentos.append({
+                'nombre': row['nombre'],
+                'porcentaje': row['porcentaje'],
+                'condicion_monto_minimo': row['condicion_monto_minimo'],
+                'descripcion': row['descripcion']
+            })
+
+        return {"success": True, "descuentos": descuentos}
+
+    except sqlite3.Error as e:
+        logger.error(f"Error al obtener descuentos activos: {e}")
+        return {"success": False, "error": str(e)}
+    finally:
+        conn.close()

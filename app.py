@@ -18,7 +18,12 @@ from src.database import (
     obtener_todas_las_notas,
     crear_nota,
     actualizar_nota,
-    eliminar_nota
+    eliminar_nota,
+    obtener_todos_los_descuentos,
+    crear_tipo_descuento,
+    actualizar_tipo_descuento,
+    eliminar_tipo_descuento,
+    obtener_descuentos_activos
 )
 from src.validators import validar_compra
 from src.utils import setup_logger, crear_directorios, generar_timestamp
@@ -322,6 +327,59 @@ def verificar_y_ejecutar_backup_automatico():
     except Exception as e:
         logger.error(f"Error en verificación de backup automático: {e}")
 
+# --- Funciones para Gestión de Tipos de Descuento ---
+
+@eel.expose
+def get_todos_los_descuentos():
+    """Obtiene todos los tipos de descuento para administración."""
+    logger.info("Solicitando todos los tipos de descuento para administración")
+    return obtener_todos_los_descuentos()
+
+@eel.expose
+def get_descuentos_activos():
+    """Obtiene solo los descuentos activos para el formulario de compras."""
+    logger.info("Solicitando descuentos activos para formulario de compras")
+    return obtener_descuentos_activos()
+
+@eel.expose
+def crear_nuevo_tipo_descuento(nombre: str, porcentaje: float, condicion_monto_minimo: float = 0.0, descripcion: str = ""):
+    """Crea un nuevo tipo de descuento."""
+    logger.info(f"Creando nuevo tipo de descuento: {nombre} ({porcentaje}%)")
+    resultado = crear_tipo_descuento(nombre, porcentaje, condicion_monto_minimo, descripcion)
+
+    if resultado.get("success"):
+        logger.info(f"Tipo de descuento creado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al crear tipo de descuento: {resultado}")
+
+    return resultado
+
+@eel.expose
+def actualizar_tipo_descuento_existente(descuento_id: int, nombre: str, porcentaje: float, condicion_monto_minimo: float = 0.0, descripcion: str = "", activo: bool = True):
+    """Actualiza un tipo de descuento existente."""
+    logger.info(f"Actualizando tipo de descuento ID {descuento_id}: {nombre} ({porcentaje}%)")
+    resultado = actualizar_tipo_descuento(descuento_id, nombre, porcentaje, condicion_monto_minimo, descripcion, activo)
+
+    if resultado.get("success"):
+        logger.info(f"Tipo de descuento actualizado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al actualizar tipo de descuento: {resultado}")
+
+    return resultado
+
+@eel.expose
+def eliminar_tipo_descuento_por_id(descuento_id: int):
+    """Elimina un tipo de descuento por su ID."""
+    logger.info(f"Eliminando tipo de descuento con ID: {descuento_id}")
+    resultado = eliminar_tipo_descuento(descuento_id)
+
+    if resultado.get("success"):
+        logger.info(f"Tipo de descuento eliminado exitosamente: {resultado}")
+    else:
+        logger.error(f"Error al eliminar tipo de descuento: {resultado}")
+
+    return resultado
+
 def iniciar_app():
     """Inicia la aplicación con verificaciones de seguridad."""
     logger.info("Iniciando aplicación...")
@@ -369,6 +427,7 @@ def iniciar_app():
     except Exception as e:
         logger.error(f"Error al iniciar Eel: {e}")
         raise
+
 
 if __name__ == "__main__":
     iniciar_app()

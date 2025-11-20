@@ -2019,3 +2019,50 @@ INFO:BarStock:Solicitando todos los productos para administración
 INFO:BarStock:Obtenidos 6 productos
 INFO:BarStock:Solicitando todos los proveedores para administración
 INFO:BarStock:Obtenidos 3 proveedores
+INFO:BarStock:Logger inicializado
+INFO:BarStock:Iniciando aplicación...
+INFO:BarStock:Backup reciente encontrado (hace 23.6h), omitiendo creación
+INFO:BarStock:Ejecutando análisis programado...
+INFO:BarStock:Generando alertas dinámicas...
+ERROR:BarStock:Error generando alertas: unrecognized token: "#"
+INFO:BarStock:Generando alertas dinámicas...
+ERROR:BarStock:Error generando alertas: unrecognized token: "#"
+INFO:BarStock:Análisis completado: 0 alertas generadas
+INFO:BarStock:Distribución: {}
+INFO:BarStock:Análisis programado: 0 alertas generadas
+INFO:BarStock:Configuración cargada. Ventana: (1200, 900)
+INFO:BarStock:Estadísticas de backups: 1 archivos, 0.0MB total
+INFO:BarStock:Iniciando interfaz web...
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 13:13:03] "GET /index.html HTTP/1.1" 200 78927 0.001899
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 13:13:03] "GET /eel.js HTTP/1.1" 200 6556 0.000354
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 13:13:03] "GET /favicon.ico HTTP/1.1" 404 882 0.002947
+INFO:BarStock:Solicitando datos iniciales para la interfaz
+INFO:BarStock:Cargados 6 productos y 3 proveedores
+INFO:BarStock:Solicitando todos los productos para administración
+INFO:BarStock:Obtenidos 6 productos
+INFO:BarStock:Solicitando todos los proveedores para administración
+INFO:BarStock:Obtenidos 3 proveedores
+INFO:BarStock:Solicitando todos los productos para administración
+INFO:BarStock:Obtenidos 6 productos
+INFO:BarStock:Logger inicializado
+INFO:BarStock:Iniciando aplicación...
+INFO:BarStock:Backup reciente encontrado (hace 23.7h), omitiendo creación
+INFO:BarStock:Ejecutando análisis programado...
+INFO:BarStock:Generando alertas dinámicas...
+ERROR:BarStock:Error generando alertas: unrecognized token: "#"
+INFO:BarStock:Generando alertas dinámicas...
+ERROR:BarStock:Error generando alertas: unrecognized token: "#"
+INFO:BarStock:Análisis completado: 0 alertas generadas
+INFO:BarStock:Distribución: {}
+INFO:BarStock:Análisis programado: 0 alertas generadas
+INFO:BarStock:Configuración cargada. Ventana: (1200, 900)
+INFO:BarStock:Estadísticas de backups: 1 archivos, 0.0MB total
+INFO:BarStock:Iniciando interfaz web...
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 13:19:18] "GET /index.html HTTP/1.1" 200 93295 0.000862
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 13:19:18] "GET /eel.js HTTP/1.1" 200 6713 0.000319
+INFO:BarStock:Solicitando datos iniciales para la interfaz
+INFO:BarStock:Cargados 6 productos y 3 proveedores
+INFO:BarStock:Solicitando todos los productos para administración
+INFO:BarStock:Obtenidos 6 productos
+INFO:BarStock:Solicitando todos los proveedores para administración
+INFO:BarStock:Obtenidos 3 proveedores
