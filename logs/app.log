@@ -2019,3 +2019,31 @@ INFO:BarStock:Solicitando todos los productos para administración
 INFO:BarStock:Obtenidos 6 productos
 INFO:BarStock:Solicitando todos los proveedores para administración
 INFO:BarStock:Obtenidos 3 proveedores
+INFO:BarStock:Logger inicializado
+INFO:BarStock:Iniciando aplicación...
+INFO:BarStock:Ejecutando backup automático...
+INFO:BarStock:Iniciando proceso de backup automático...
+INFO:BarStock:Iniciando backup de base de datos...
+INFO:BarStock:Backup creado exitosamente: backups\stock_backup_20251120_152052.db.gz
+INFO:BarStock:Limpieza completada: 0 backups eliminados
+INFO:BarStock:Backup automático completado: {'timestamp': '2025-11-20T15:20:52.056741', 'backup_creado': True, 'backup_path': 'backups\\stock_backup_20251120_152052.db.gz', 'limpieza_realizada': False, 'backups_eliminados': 0, 'errores': []}
+INFO:BarStock:Backup automático creado: backups\stock_backup_20251120_152052.db.gz
+INFO:BarStock:Ejecutando análisis programado...
+INFO:BarStock:Generando alertas dinámicas...
+ERROR:BarStock:Error generando alertas: unrecognized token: "#"
+INFO:BarStock:Generando alertas dinámicas...
+ERROR:BarStock:Error generando alertas: unrecognized token: "#"
+INFO:BarStock:Análisis completado: 0 alertas generadas
+INFO:BarStock:Distribución: {}
+INFO:BarStock:Análisis programado: 0 alertas generadas
+INFO:BarStock:Configuración cargada. Ventana: (1200, 900)
+INFO:BarStock:Estadísticas de backups: 2 archivos, 0.0MB total
+INFO:BarStock:Iniciando interfaz web...
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 15:20:52] "GET /index.html HTTP/1.1" 200 78927 0.000987
+INFO:geventwebsocket.handler:127.0.0.1 - - [2025-11-20 15:20:52] "GET /eel.js HTTP/1.1" 200 6556 0.000325
+INFO:BarStock:Solicitando datos iniciales para la interfaz
+INFO:BarStock:Cargados 6 productos y 3 proveedores
+INFO:BarStock:Solicitando todos los productos para administración
+INFO:BarStock:Obtenidos 6 productos
+INFO:BarStock:Solicitando todos los proveedores para administración
+INFO:BarStock:Obtenidos 3 proveedores
