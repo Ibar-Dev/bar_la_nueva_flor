@@ -3,13 +3,32 @@
 
 # Ignorar logs y archivos temporales
 *.log
+logs/
 
 # Ignorar carpetas de entorno virtual
 venv/
 .venv/
 
 # Ignorar archivos de Python compilados
-pycache/
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Ignorar artefactos de compilación de PyInstaller
+build/
+dist/
+*.spec
+
+# Ignorar backups y datos
+backups/
+data/
+exports/
+
+# Ignorar cache de testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Ignorar configuración de Claude Code
 .claude/
-/.claude/

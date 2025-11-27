@@ -174,9 +174,9 @@ def _generar_alertas_precios(cursor) -> List[Dict]:
         MAX(c.fecha_compra) as ultima_compra
     FROM Compras c
     JOIN Productos p ON c.producto_id = p.id
-    WHERE c.fecha_compra >= date('now', '-90 days')  # Últimos 90 días
+    WHERE c.fecha_compra >= date('now', '-90 days')  -- Últimos 90 días
     GROUP BY p.nombre
-    HAVING num_compras >= 3  # Al menos 3 compras
+    HAVING num_compras >= 3  -- Al menos 3 compras
        AND (precio_max - precio_min) / precio_promedio > ?
     ORDER BY (precio_max - precio_min) DESC
     """
@@ -216,7 +216,7 @@ def _generar_alertas_proveedores(cursor) -> List[Dict]:
         FROM Compras c
         JOIN Productos p ON c.producto_id = p.id
         LEFT JOIN Proveedores pr ON c.proveedor_id = pr.id
-        WHERE c.fecha_compra >= date('now', '-60 days')  # Últimos 60 días
+        WHERE c.fecha_compra >= date('now', '-60 days')  -- Últimos 60 días
         GROUP BY p.nombre, pr.nombre
         HAVING num_compras >= 2
     ),
