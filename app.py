@@ -15,10 +15,12 @@ from src.database import (
     crear_proveedor,
     actualizar_proveedor,
     eliminar_proveedor,
+    obtener_proveedor_por_id,
     obtener_todas_las_notas,
     crear_nota,
     actualizar_nota,
     eliminar_nota,
+    obtener_nota_por_id,
     obtener_todos_los_descuentos,
     crear_tipo_descuento,
     actualizar_tipo_descuento,
@@ -232,8 +234,7 @@ def eliminar_proveedor_por_id(proveedor_id):
 def get_proveedor_por_id(proveedor_id):
     """Obtiene un proveedor por su ID."""
     logger.info(f"Obteniendo proveedor con ID: {proveedor_id}")
-    # Esta función necesita ser implementada en database.py
-    return {"success": False, "error": "Función no implementada"}
+    return obtener_proveedor_por_id(proveedor_id)
 
 # --- Funciones para Sistema de Notas ---
 
@@ -286,8 +287,7 @@ def eliminar_nota_por_id(nota_id):
 def get_nota_por_id(nota_id):
     """Obtiene una nota por su ID."""
     logger.info(f"Obteniendo nota con ID: {nota_id}")
-    # Esta función necesita ser implementada en database.py
-    return {"success": False, "error": "Función no implementada"}
+    return obtener_nota_por_id(nota_id)
 
 # --- Iniciar la Aplicación ---
 
@@ -389,10 +389,10 @@ def iniciar_app():
         logger.error("No se puede conectar a la base de datos. Ejecuta 'python setup/database_setup.py' primero.")
         return
 
-    # Ejutar backup automático si es necesario
+    # Ejecutar backup automático si es necesario
     verificar_y_ejecutar_backup_automatico()
 
-    # Ejutar análisis programado para alertas
+    # Ejecutar análisis programado para alertas
     try:
         analisis_resultado = ejecutar_analisis_programado()
         logger.info(f"Análisis programado: {analisis_resultado['alertas_generadas']} alertas generadas")
