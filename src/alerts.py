@@ -235,7 +235,7 @@ def _generar_alertas_proveedores(cursor) -> List[Dict]:
         (pp.precio_promedio - mp.mejor_precio) / mp.mejor_precio as exceso_pct
     FROM precios_proveedor pp
     JOIN mejor_precio mp ON pp.producto = mp.producto
-    WHERE pp.precio_promedio > mp.mejor_precio * 1.20  # 20% más caro que el mejor
+    WHERE pp.precio_promedio > mp.mejor_precio * 1.20  -- 20% más caro que el mejor
     ORDER BY exceso_pct DESC
     LIMIT 5
     """
