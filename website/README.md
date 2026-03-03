@@ -23,7 +23,7 @@ Cafetería-restaurante de barrio que sirve desayunos y comidas del día.
 
 ```bash
 cd website
-pip install reflex==0.6.7
+pip install -r requirements.txt
 reflex run
 ```
 
