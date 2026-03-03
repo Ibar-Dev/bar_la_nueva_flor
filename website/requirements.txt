@@ -1,0 +1,3 @@
+reflex==0.7.11
+# sqlmodel 0.0.24 is pinned for compatibility with reflex's pydantic v1 patch layer
+sqlmodel==0.0.24
